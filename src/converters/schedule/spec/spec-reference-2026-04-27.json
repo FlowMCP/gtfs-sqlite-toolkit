@@ -1,0 +1,2224 @@
+{
+  "specUrl": "https://gtfs.org/documentation/schedule/reference/",
+  "specRevision": "2026-04-27",
+  "sourceMarkdown": "https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md",
+  "generatedAt": "2026-05-21T01:30:12.855Z",
+  "files": {
+    "agency.txt": {
+      "filename": "agency.txt",
+      "fileStatus": "required",
+      "primaryKey": [
+        "agency_id"
+      ],
+      "fields": [
+        {
+          "name": "agency_id",
+          "type": "TEXT",
+          "rawType": "Unique ID",
+          "presence": "conditionally_required"
+        },
+        {
+          "name": "agency_name",
+          "type": "TEXT",
+          "rawType": "Text",
+          "presence": "required"
+        },
+        {
+          "name": "agency_url",
+          "type": "TEXT",
+          "rawType": "URL",
+          "presence": "required"
+        },
+        {
+          "name": "agency_timezone",
+          "type": "TEXT",
+          "rawType": "Timezone",
+          "presence": "required"
+        },
+        {
+          "name": "agency_lang",
+          "type": "TEXT",
+          "rawType": "Language code",
+          "presence": "optional"
+        },
+        {
+          "name": "agency_phone",
+          "type": "TEXT",
+          "rawType": "Phone number",
+          "presence": "optional"
+        },
+        {
+          "name": "agency_fare_url",
+          "type": "TEXT",
+          "rawType": "URL",
+          "presence": "optional"
+        },
+        {
+          "name": "agency_email",
+          "type": "TEXT",
+          "rawType": "Email",
+          "presence": "optional"
+        },
+        {
+          "name": "cemv_support",
+          "type": "INTEGER",
+          "rawType": "Enum",
+          "presence": "optional"
+        }
+      ],
+      "foreignKeys": []
+    },
+    "stops.txt": {
+      "filename": "stops.txt",
+      "fileStatus": "conditionally_required",
+      "primaryKey": [
+        "stop_id"
+      ],
+      "fields": [
+        {
+          "name": "stop_id",
+          "type": "TEXT",
+          "rawType": "Unique ID",
+          "presence": "required"
+        },
+        {
+          "name": "stop_code",
+          "type": "TEXT",
+          "rawType": "Text",
+          "presence": "optional"
+        },
+        {
+          "name": "stop_name",
+          "type": "TEXT",
+          "rawType": "Text",
+          "presence": "conditionally_required"
+        },
+        {
+          "name": "tts_stop_name",
+          "type": "TEXT",
+          "rawType": "Text",
+          "presence": "optional"
+        },
+        {
+          "name": "stop_desc",
+          "type": "TEXT",
+          "rawType": "Text",
+          "presence": "optional"
+        },
+        {
+          "name": "stop_lat",
+          "type": "REAL",
+          "rawType": "Latitude",
+          "presence": "conditionally_required"
+        },
+        {
+          "name": "stop_lon",
+          "type": "REAL",
+          "rawType": "Longitude",
+          "presence": "conditionally_required"
+        },
+        {
+          "name": "zone_id",
+          "type": "TEXT",
+          "rawType": "ID",
+          "presence": "optional"
+        },
+        {
+          "name": "stop_url",
+          "type": "TEXT",
+          "rawType": "URL",
+          "presence": "optional"
+        },
+        {
+          "name": "location_type",
+          "type": "INTEGER",
+          "rawType": "Enum",
+          "presence": "optional"
+        },
+        {
+          "name": "parent_station",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `stops.stop_id`",
+          "presence": "conditionally_required",
+          "foreignKey": {
+            "file": "stops.txt",
+            "field": "stop_id"
+          }
+        },
+        {
+          "name": "stop_timezone",
+          "type": "TEXT",
+          "rawType": "Timezone",
+          "presence": "optional"
+        },
+        {
+          "name": "wheelchair_boarding",
+          "type": "INTEGER",
+          "rawType": "Enum",
+          "presence": "optional"
+        },
+        {
+          "name": "level_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `levels.level_id`",
+          "presence": "optional",
+          "foreignKey": {
+            "file": "levels.txt",
+            "field": "level_id"
+          }
+        },
+        {
+          "name": "platform_code",
+          "type": "TEXT",
+          "rawType": "Text",
+          "presence": "optional"
+        },
+        {
+          "name": "stop_access",
+          "type": "INTEGER",
+          "rawType": "Enum",
+          "presence": "conditionally_forbidden"
+        }
+      ],
+      "foreignKeys": [
+        {
+          "from": "parent_station",
+          "to": {
+            "file": "stops.txt",
+            "field": "stop_id"
+          }
+        },
+        {
+          "from": "level_id",
+          "to": {
+            "file": "levels.txt",
+            "field": "level_id"
+          }
+        }
+      ]
+    },
+    "routes.txt": {
+      "filename": "routes.txt",
+      "fileStatus": "required",
+      "primaryKey": [
+        "route_id"
+      ],
+      "fields": [
+        {
+          "name": "route_id",
+          "type": "TEXT",
+          "rawType": "Unique ID",
+          "presence": "required"
+        },
+        {
+          "name": "agency_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `agency.agency_id`",
+          "presence": "conditionally_required",
+          "foreignKey": {
+            "file": "agency.txt",
+            "field": "agency_id"
+          }
+        },
+        {
+          "name": "route_short_name",
+          "type": "TEXT",
+          "rawType": "Text",
+          "presence": "conditionally_required"
+        },
+        {
+          "name": "route_long_name",
+          "type": "TEXT",
+          "rawType": "Text",
+          "presence": "conditionally_required"
+        },
+        {
+          "name": "route_desc",
+          "type": "TEXT",
+          "rawType": "Text",
+          "presence": "optional"
+        },
+        {
+          "name": "route_type",
+          "type": "INTEGER",
+          "rawType": "Enum",
+          "presence": "required"
+        },
+        {
+          "name": "route_url",
+          "type": "TEXT",
+          "rawType": "URL",
+          "presence": "optional"
+        },
+        {
+          "name": "route_color",
+          "type": "TEXT",
+          "rawType": "Color",
+          "presence": "optional"
+        },
+        {
+          "name": "route_text_color",
+          "type": "TEXT",
+          "rawType": "Color",
+          "presence": "optional"
+        },
+        {
+          "name": "route_sort_order",
+          "type": "INTEGER",
+          "rawType": "Non-negative integer",
+          "presence": "optional"
+        },
+        {
+          "name": "continuous_pickup",
+          "type": "INTEGER",
+          "rawType": "Enum",
+          "presence": "conditionally_forbidden"
+        },
+        {
+          "name": "continuous_drop_off",
+          "type": "INTEGER",
+          "rawType": "Enum",
+          "presence": "conditionally_forbidden"
+        },
+        {
+          "name": "cemv_support",
+          "type": "INTEGER",
+          "rawType": "Enum",
+          "presence": "optional"
+        }
+      ],
+      "foreignKeys": [
+        {
+          "from": "agency_id",
+          "to": {
+            "file": "agency.txt",
+            "field": "agency_id"
+          }
+        }
+      ]
+    },
+    "trips.txt": {
+      "filename": "trips.txt",
+      "fileStatus": "required",
+      "primaryKey": [
+        "trip_id"
+      ],
+      "fields": [
+        {
+          "name": "route_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `routes.route_id`",
+          "presence": "required",
+          "foreignKey": {
+            "file": "routes.txt",
+            "field": "route_id"
+          }
+        },
+        {
+          "name": "service_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `calendar.service_id` or `calendar_dates.service_id`",
+          "presence": "required",
+          "foreignKey": {
+            "file": "calendar.txt",
+            "field": "service_id"
+          }
+        },
+        {
+          "name": "trip_id",
+          "type": "TEXT",
+          "rawType": "Unique ID",
+          "presence": "required"
+        },
+        {
+          "name": "trip_headsign",
+          "type": "TEXT",
+          "rawType": "Text",
+          "presence": "optional"
+        },
+        {
+          "name": "trip_short_name",
+          "type": "TEXT",
+          "rawType": "Text",
+          "presence": "optional"
+        },
+        {
+          "name": "direction_id",
+          "type": "INTEGER",
+          "rawType": "Enum",
+          "presence": "optional"
+        },
+        {
+          "name": "block_id",
+          "type": "TEXT",
+          "rawType": "ID",
+          "presence": "optional"
+        },
+        {
+          "name": "shape_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `shapes.shape_id`",
+          "presence": "conditionally_required",
+          "foreignKey": {
+            "file": "shapes.txt",
+            "field": "shape_id"
+          }
+        },
+        {
+          "name": "wheelchair_accessible",
+          "type": "INTEGER",
+          "rawType": "Enum",
+          "presence": "optional"
+        },
+        {
+          "name": "bikes_allowed",
+          "type": "INTEGER",
+          "rawType": "Enum",
+          "presence": "optional"
+        },
+        {
+          "name": "cars_allowed",
+          "type": "INTEGER",
+          "rawType": "Enum",
+          "presence": "optional"
+        },
+        {
+          "name": "safe_duration_factor",
+          "type": "REAL",
+          "rawType": "Float",
+          "presence": "optional"
+        },
+        {
+          "name": "safe_duration_offset",
+          "type": "REAL",
+          "rawType": "Float",
+          "presence": "optional"
+        }
+      ],
+      "foreignKeys": [
+        {
+          "from": "route_id",
+          "to": {
+            "file": "routes.txt",
+            "field": "route_id"
+          }
+        },
+        {
+          "from": "service_id",
+          "to": {
+            "file": "calendar.txt",
+            "field": "service_id"
+          }
+        },
+        {
+          "from": "shape_id",
+          "to": {
+            "file": "shapes.txt",
+            "field": "shape_id"
+          }
+        }
+      ]
+    },
+    "stop_times.txt": {
+      "filename": "stop_times.txt",
+      "fileStatus": "required",
+      "primaryKey": [
+        "trip_id",
+        "stop_sequence"
+      ],
+      "fields": [
+        {
+          "name": "trip_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `trips.trip_id`",
+          "presence": "required",
+          "foreignKey": {
+            "file": "trips.txt",
+            "field": "trip_id"
+          }
+        },
+        {
+          "name": "arrival_time",
+          "type": "TEXT",
+          "rawType": "Time",
+          "presence": "conditionally_required"
+        },
+        {
+          "name": "departure_time",
+          "type": "TEXT",
+          "rawType": "Time",
+          "presence": "conditionally_required"
+        },
+        {
+          "name": "stop_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `stops.stop_id`",
+          "presence": "conditionally_required",
+          "foreignKey": {
+            "file": "stops.txt",
+            "field": "stop_id"
+          }
+        },
+        {
+          "name": "location_group_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `location_groups.location_group_id`",
+          "presence": "conditionally_forbidden",
+          "foreignKey": {
+            "file": "location_groups.txt",
+            "field": "location_group_id"
+          }
+        },
+        {
+          "name": "location_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `id` from `locations.geojson`",
+          "presence": "conditionally_forbidden"
+        },
+        {
+          "name": "stop_sequence",
+          "type": "INTEGER",
+          "rawType": "Non-negative integer",
+          "presence": "required"
+        },
+        {
+          "name": "stop_headsign",
+          "type": "TEXT",
+          "rawType": "Text",
+          "presence": "optional"
+        },
+        {
+          "name": "start_pickup_drop_off_window",
+          "type": "TEXT",
+          "rawType": "Time",
+          "presence": "conditionally_required"
+        },
+        {
+          "name": "end_pickup_drop_off_window",
+          "type": "TEXT",
+          "rawType": "Time",
+          "presence": "conditionally_required"
+        },
+        {
+          "name": "pickup_type",
+          "type": "INTEGER",
+          "rawType": "Enum",
+          "presence": "conditionally_forbidden"
+        },
+        {
+          "name": "drop_off_type",
+          "type": "INTEGER",
+          "rawType": "Enum",
+          "presence": "conditionally_forbidden"
+        },
+        {
+          "name": "continuous_pickup",
+          "type": "INTEGER",
+          "rawType": "Enum",
+          "presence": "conditionally_forbidden"
+        },
+        {
+          "name": "continuous_drop_off",
+          "type": "INTEGER",
+          "rawType": "Enum",
+          "presence": "conditionally_forbidden"
+        },
+        {
+          "name": "shape_dist_traveled",
+          "type": "REAL",
+          "rawType": "Non-negative float",
+          "presence": "optional"
+        },
+        {
+          "name": "timepoint",
+          "type": "INTEGER",
+          "rawType": "Enum",
+          "presence": "optional"
+        },
+        {
+          "name": "pickup_booking_rule_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `booking_rules.booking_rule_id`",
+          "presence": "optional",
+          "foreignKey": {
+            "file": "booking_rules.txt",
+            "field": "booking_rule_id"
+          }
+        },
+        {
+          "name": "drop_off_booking_rule_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `booking_rules.booking_rule_id`",
+          "presence": "optional",
+          "foreignKey": {
+            "file": "booking_rules.txt",
+            "field": "booking_rule_id"
+          }
+        }
+      ],
+      "foreignKeys": [
+        {
+          "from": "trip_id",
+          "to": {
+            "file": "trips.txt",
+            "field": "trip_id"
+          }
+        },
+        {
+          "from": "stop_id",
+          "to": {
+            "file": "stops.txt",
+            "field": "stop_id"
+          }
+        },
+        {
+          "from": "location_group_id",
+          "to": {
+            "file": "location_groups.txt",
+            "field": "location_group_id"
+          }
+        },
+        {
+          "from": "pickup_booking_rule_id",
+          "to": {
+            "file": "booking_rules.txt",
+            "field": "booking_rule_id"
+          }
+        },
+        {
+          "from": "drop_off_booking_rule_id",
+          "to": {
+            "file": "booking_rules.txt",
+            "field": "booking_rule_id"
+          }
+        }
+      ]
+    },
+    "calendar.txt": {
+      "filename": "calendar.txt",
+      "fileStatus": "conditionally_required",
+      "primaryKey": [
+        "service_id"
+      ],
+      "fields": [
+        {
+          "name": "service_id",
+          "type": "TEXT",
+          "rawType": "Unique ID",
+          "presence": "required"
+        },
+        {
+          "name": "monday",
+          "type": "INTEGER",
+          "rawType": "Enum",
+          "presence": "required"
+        },
+        {
+          "name": "tuesday",
+          "type": "INTEGER",
+          "rawType": "Enum",
+          "presence": "required"
+        },
+        {
+          "name": "wednesday",
+          "type": "INTEGER",
+          "rawType": "Enum",
+          "presence": "required"
+        },
+        {
+          "name": "thursday",
+          "type": "INTEGER",
+          "rawType": "Enum",
+          "presence": "required"
+        },
+        {
+          "name": "friday",
+          "type": "INTEGER",
+          "rawType": "Enum",
+          "presence": "required"
+        },
+        {
+          "name": "saturday",
+          "type": "INTEGER",
+          "rawType": "Enum",
+          "presence": "required"
+        },
+        {
+          "name": "sunday",
+          "type": "INTEGER",
+          "rawType": "Enum",
+          "presence": "required"
+        },
+        {
+          "name": "start_date",
+          "type": "TEXT",
+          "rawType": "Date",
+          "presence": "required"
+        },
+        {
+          "name": "end_date",
+          "type": "TEXT",
+          "rawType": "Date",
+          "presence": "required"
+        }
+      ],
+      "foreignKeys": []
+    },
+    "calendar_dates.txt": {
+      "filename": "calendar_dates.txt",
+      "fileStatus": "conditionally_required",
+      "primaryKey": [
+        "service_id",
+        "date"
+      ],
+      "fields": [
+        {
+          "name": "service_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `calendar.service_id` or ID",
+          "presence": "required",
+          "foreignKey": {
+            "file": "calendar.txt",
+            "field": "service_id"
+          }
+        },
+        {
+          "name": "date",
+          "type": "TEXT",
+          "rawType": "Date",
+          "presence": "required"
+        },
+        {
+          "name": "exception_type",
+          "type": "INTEGER",
+          "rawType": "Enum",
+          "presence": "required"
+        }
+      ],
+      "foreignKeys": [
+        {
+          "from": "service_id",
+          "to": {
+            "file": "calendar.txt",
+            "field": "service_id"
+          }
+        }
+      ]
+    },
+    "fare_attributes.txt": {
+      "filename": "fare_attributes.txt",
+      "fileStatus": "optional",
+      "primaryKey": [
+        "fare_id"
+      ],
+      "fields": [
+        {
+          "name": "fare_id",
+          "type": "TEXT",
+          "rawType": "Unique ID",
+          "presence": "required"
+        },
+        {
+          "name": "price",
+          "type": "REAL",
+          "rawType": "Non-negative float",
+          "presence": "required"
+        },
+        {
+          "name": "currency_type",
+          "type": "TEXT",
+          "rawType": "Currency code",
+          "presence": "required"
+        },
+        {
+          "name": "payment_method",
+          "type": "INTEGER",
+          "rawType": "Enum",
+          "presence": "required"
+        },
+        {
+          "name": "transfers",
+          "type": "INTEGER",
+          "rawType": "Enum",
+          "presence": "required"
+        },
+        {
+          "name": "agency_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `agency.agency_id`",
+          "presence": "conditionally_required",
+          "foreignKey": {
+            "file": "agency.txt",
+            "field": "agency_id"
+          }
+        },
+        {
+          "name": "transfer_duration",
+          "type": "INTEGER",
+          "rawType": "Non-negative integer",
+          "presence": "optional"
+        }
+      ],
+      "foreignKeys": [
+        {
+          "from": "agency_id",
+          "to": {
+            "file": "agency.txt",
+            "field": "agency_id"
+          }
+        }
+      ]
+    },
+    "fare_rules.txt": {
+      "filename": "fare_rules.txt",
+      "fileStatus": "optional",
+      "primaryKey": [
+        "*"
+      ],
+      "fields": [
+        {
+          "name": "fare_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `fare_attributes.fare_id`",
+          "presence": "required",
+          "foreignKey": {
+            "file": "fare_attributes.txt",
+            "field": "fare_id"
+          }
+        },
+        {
+          "name": "route_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `routes.route_id`",
+          "presence": "optional",
+          "foreignKey": {
+            "file": "routes.txt",
+            "field": "route_id"
+          }
+        },
+        {
+          "name": "origin_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `stops.zone_id`",
+          "presence": "optional",
+          "foreignKey": {
+            "file": "stops.txt",
+            "field": "zone_id"
+          }
+        },
+        {
+          "name": "destination_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `stops.zone_id`",
+          "presence": "optional",
+          "foreignKey": {
+            "file": "stops.txt",
+            "field": "zone_id"
+          }
+        },
+        {
+          "name": "contains_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `stops.zone_id`",
+          "presence": "optional",
+          "foreignKey": {
+            "file": "stops.txt",
+            "field": "zone_id"
+          }
+        }
+      ],
+      "foreignKeys": [
+        {
+          "from": "fare_id",
+          "to": {
+            "file": "fare_attributes.txt",
+            "field": "fare_id"
+          }
+        },
+        {
+          "from": "route_id",
+          "to": {
+            "file": "routes.txt",
+            "field": "route_id"
+          }
+        },
+        {
+          "from": "origin_id",
+          "to": {
+            "file": "stops.txt",
+            "field": "zone_id"
+          }
+        },
+        {
+          "from": "destination_id",
+          "to": {
+            "file": "stops.txt",
+            "field": "zone_id"
+          }
+        },
+        {
+          "from": "contains_id",
+          "to": {
+            "file": "stops.txt",
+            "field": "zone_id"
+          }
+        }
+      ]
+    },
+    "timeframes.txt": {
+      "filename": "timeframes.txt",
+      "fileStatus": "optional",
+      "primaryKey": [
+        "*"
+      ],
+      "fields": [
+        {
+          "name": "timeframe_group_id",
+          "type": "TEXT",
+          "rawType": "ID",
+          "presence": "required"
+        },
+        {
+          "name": "start_time",
+          "type": "TEXT",
+          "rawType": "Local time",
+          "presence": "conditionally_required"
+        },
+        {
+          "name": "end_time",
+          "type": "TEXT",
+          "rawType": "Local time",
+          "presence": "conditionally_required"
+        },
+        {
+          "name": "service_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `calendar.service_id` or `calendar_dates.service_id`",
+          "presence": "required",
+          "foreignKey": {
+            "file": "calendar.txt",
+            "field": "service_id"
+          }
+        }
+      ],
+      "foreignKeys": [
+        {
+          "from": "service_id",
+          "to": {
+            "file": "calendar.txt",
+            "field": "service_id"
+          }
+        }
+      ]
+    },
+    "rider_categories.txt": {
+      "filename": "rider_categories.txt",
+      "fileStatus": "optional",
+      "primaryKey": [
+        "rider_category_id"
+      ],
+      "fields": [
+        {
+          "name": "rider_category_id",
+          "type": "TEXT",
+          "rawType": "Unique ID",
+          "presence": "required"
+        },
+        {
+          "name": "rider_category_name",
+          "type": "TEXT",
+          "rawType": "Text",
+          "presence": "required"
+        },
+        {
+          "name": "is_default_fare_category",
+          "type": "INTEGER",
+          "rawType": "Enum",
+          "presence": "required"
+        },
+        {
+          "name": "eligibility_url",
+          "type": "TEXT",
+          "rawType": "URL",
+          "presence": "optional"
+        }
+      ],
+      "foreignKeys": []
+    },
+    "fare_media.txt": {
+      "filename": "fare_media.txt",
+      "fileStatus": "optional",
+      "primaryKey": [
+        "fare_media_id"
+      ],
+      "fields": [
+        {
+          "name": "fare_media_id",
+          "type": "TEXT",
+          "rawType": "Unique ID",
+          "presence": "required"
+        },
+        {
+          "name": "fare_media_name",
+          "type": "TEXT",
+          "rawType": "Text",
+          "presence": "optional"
+        },
+        {
+          "name": "fare_media_type",
+          "type": "INTEGER",
+          "rawType": "Enum",
+          "presence": "required"
+        }
+      ],
+      "foreignKeys": []
+    },
+    "fare_products.txt": {
+      "filename": "fare_products.txt",
+      "fileStatus": "optional",
+      "primaryKey": [
+        "fare_product_id",
+        "rider_category_id",
+        "fare_media_id"
+      ],
+      "fields": [
+        {
+          "name": "fare_product_id",
+          "type": "TEXT",
+          "rawType": "ID",
+          "presence": "required"
+        },
+        {
+          "name": "fare_product_name",
+          "type": "TEXT",
+          "rawType": "Text",
+          "presence": "optional"
+        },
+        {
+          "name": "rider_category_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `rider_categories.rider_category_id`",
+          "presence": "optional",
+          "foreignKey": {
+            "file": "rider_categories.txt",
+            "field": "rider_category_id"
+          }
+        },
+        {
+          "name": "fare_media_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `fare_media.fare_media_id`",
+          "presence": "optional",
+          "foreignKey": {
+            "file": "fare_media.txt",
+            "field": "fare_media_id"
+          }
+        },
+        {
+          "name": "amount",
+          "type": "TEXT",
+          "rawType": "Currency amount",
+          "presence": "required"
+        },
+        {
+          "name": "currency",
+          "type": "TEXT",
+          "rawType": "Currency code",
+          "presence": "required"
+        }
+      ],
+      "foreignKeys": [
+        {
+          "from": "rider_category_id",
+          "to": {
+            "file": "rider_categories.txt",
+            "field": "rider_category_id"
+          }
+        },
+        {
+          "from": "fare_media_id",
+          "to": {
+            "file": "fare_media.txt",
+            "field": "fare_media_id"
+          }
+        }
+      ]
+    },
+    "fare_leg_rules.txt": {
+      "filename": "fare_leg_rules.txt",
+      "fileStatus": "optional",
+      "primaryKey": [
+        "network_id",
+        "from_area_id",
+        "to_area_id",
+        "from_timeframe_group_id",
+        "to_timeframe_group_id",
+        "fare_product_id"
+      ],
+      "fields": [
+        {
+          "name": "leg_group_id",
+          "type": "TEXT",
+          "rawType": "ID",
+          "presence": "optional"
+        },
+        {
+          "name": "network_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `routes.network_id` or `networks.network_id`",
+          "presence": "optional",
+          "foreignKey": {
+            "file": "routes.txt",
+            "field": "network_id"
+          }
+        },
+        {
+          "name": "from_area_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `areas.area_id`",
+          "presence": "optional",
+          "foreignKey": {
+            "file": "areas.txt",
+            "field": "area_id"
+          }
+        },
+        {
+          "name": "to_area_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `areas.area_id`",
+          "presence": "optional",
+          "foreignKey": {
+            "file": "areas.txt",
+            "field": "area_id"
+          }
+        },
+        {
+          "name": "from_timeframe_group_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `timeframes.timeframe_group_id`",
+          "presence": "optional",
+          "foreignKey": {
+            "file": "timeframes.txt",
+            "field": "timeframe_group_id"
+          }
+        },
+        {
+          "name": "to_timeframe_group_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `timeframes.timeframe_group_id`",
+          "presence": "optional",
+          "foreignKey": {
+            "file": "timeframes.txt",
+            "field": "timeframe_group_id"
+          }
+        },
+        {
+          "name": "fare_product_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `fare_products.fare_product_id`",
+          "presence": "required",
+          "foreignKey": {
+            "file": "fare_products.txt",
+            "field": "fare_product_id"
+          }
+        },
+        {
+          "name": "rule_priority",
+          "type": "INTEGER",
+          "rawType": "Non-negative integer",
+          "presence": "optional"
+        }
+      ],
+      "foreignKeys": [
+        {
+          "from": "network_id",
+          "to": {
+            "file": "routes.txt",
+            "field": "network_id"
+          }
+        },
+        {
+          "from": "from_area_id",
+          "to": {
+            "file": "areas.txt",
+            "field": "area_id"
+          }
+        },
+        {
+          "from": "to_area_id",
+          "to": {
+            "file": "areas.txt",
+            "field": "area_id"
+          }
+        },
+        {
+          "from": "from_timeframe_group_id",
+          "to": {
+            "file": "timeframes.txt",
+            "field": "timeframe_group_id"
+          }
+        },
+        {
+          "from": "to_timeframe_group_id",
+          "to": {
+            "file": "timeframes.txt",
+            "field": "timeframe_group_id"
+          }
+        },
+        {
+          "from": "fare_product_id",
+          "to": {
+            "file": "fare_products.txt",
+            "field": "fare_product_id"
+          }
+        }
+      ]
+    },
+    "fare_leg_join_rules.txt": {
+      "filename": "fare_leg_join_rules.txt",
+      "fileStatus": "optional",
+      "primaryKey": [],
+      "fields": [
+        {
+          "name": "from_network_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `routes.network_id` or `networks.network_id`",
+          "presence": "required",
+          "foreignKey": {
+            "file": "routes.txt",
+            "field": "network_id"
+          }
+        },
+        {
+          "name": "to_network_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `routes.network_id` or `networks.network_id`",
+          "presence": "required",
+          "foreignKey": {
+            "file": "routes.txt",
+            "field": "network_id"
+          }
+        },
+        {
+          "name": "from_stop_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `stops.stop_id`",
+          "presence": "conditionally_required",
+          "foreignKey": {
+            "file": "stops.txt",
+            "field": "stop_id"
+          }
+        },
+        {
+          "name": "to_stop_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `stops.stop_id`",
+          "presence": "conditionally_required",
+          "foreignKey": {
+            "file": "stops.txt",
+            "field": "stop_id"
+          }
+        }
+      ],
+      "foreignKeys": [
+        {
+          "from": "from_network_id",
+          "to": {
+            "file": "routes.txt",
+            "field": "network_id"
+          }
+        },
+        {
+          "from": "to_network_id",
+          "to": {
+            "file": "routes.txt",
+            "field": "network_id"
+          }
+        },
+        {
+          "from": "from_stop_id",
+          "to": {
+            "file": "stops.txt",
+            "field": "stop_id"
+          }
+        },
+        {
+          "from": "to_stop_id",
+          "to": {
+            "file": "stops.txt",
+            "field": "stop_id"
+          }
+        }
+      ]
+    },
+    "fare_transfer_rules.txt": {
+      "filename": "fare_transfer_rules.txt",
+      "fileStatus": "optional",
+      "primaryKey": [
+        "from_leg_group_id",
+        "to_leg_group_id",
+        "fare_product_id",
+        "transfer_count",
+        "duration_limit"
+      ],
+      "fields": [
+        {
+          "name": "from_leg_group_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `fare_leg_rules.leg_group_id`",
+          "presence": "optional",
+          "foreignKey": {
+            "file": "fare_leg_rules.txt",
+            "field": "leg_group_id"
+          }
+        },
+        {
+          "name": "to_leg_group_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `fare_leg_rules.leg_group_id`",
+          "presence": "optional",
+          "foreignKey": {
+            "file": "fare_leg_rules.txt",
+            "field": "leg_group_id"
+          }
+        },
+        {
+          "name": "transfer_count",
+          "type": "TEXT",
+          "rawType": "Non-zero integer",
+          "presence": "conditionally_forbidden"
+        },
+        {
+          "name": "duration_limit",
+          "type": "INTEGER",
+          "rawType": "Positive integer",
+          "presence": "optional"
+        },
+        {
+          "name": "duration_limit_type",
+          "type": "INTEGER",
+          "rawType": "Enum",
+          "presence": "conditionally_required"
+        },
+        {
+          "name": "fare_transfer_type",
+          "type": "INTEGER",
+          "rawType": "Enum",
+          "presence": "required"
+        },
+        {
+          "name": "fare_product_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `fare_products.fare_product_id`",
+          "presence": "optional",
+          "foreignKey": {
+            "file": "fare_products.txt",
+            "field": "fare_product_id"
+          }
+        }
+      ],
+      "foreignKeys": [
+        {
+          "from": "from_leg_group_id",
+          "to": {
+            "file": "fare_leg_rules.txt",
+            "field": "leg_group_id"
+          }
+        },
+        {
+          "from": "to_leg_group_id",
+          "to": {
+            "file": "fare_leg_rules.txt",
+            "field": "leg_group_id"
+          }
+        },
+        {
+          "from": "fare_product_id",
+          "to": {
+            "file": "fare_products.txt",
+            "field": "fare_product_id"
+          }
+        }
+      ]
+    },
+    "areas.txt": {
+      "filename": "areas.txt",
+      "fileStatus": "optional",
+      "primaryKey": [
+        "area_id"
+      ],
+      "fields": [
+        {
+          "name": "area_id",
+          "type": "TEXT",
+          "rawType": "Unique ID",
+          "presence": "required"
+        },
+        {
+          "name": "area_name",
+          "type": "TEXT",
+          "rawType": "Text",
+          "presence": "optional"
+        }
+      ],
+      "foreignKeys": []
+    },
+    "stop_areas.txt": {
+      "filename": "stop_areas.txt",
+      "fileStatus": "optional",
+      "primaryKey": [
+        "*"
+      ],
+      "fields": [
+        {
+          "name": "area_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `areas.area_id`",
+          "presence": "required",
+          "foreignKey": {
+            "file": "areas.txt",
+            "field": "area_id"
+          }
+        },
+        {
+          "name": "stop_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `stops.stop_id`",
+          "presence": "required",
+          "foreignKey": {
+            "file": "stops.txt",
+            "field": "stop_id"
+          }
+        }
+      ],
+      "foreignKeys": [
+        {
+          "from": "area_id",
+          "to": {
+            "file": "areas.txt",
+            "field": "area_id"
+          }
+        },
+        {
+          "from": "stop_id",
+          "to": {
+            "file": "stops.txt",
+            "field": "stop_id"
+          }
+        }
+      ]
+    },
+    "networks.txt": {
+      "filename": "networks.txt",
+      "fileStatus": "conditionally_forbidden",
+      "primaryKey": [
+        "network_id"
+      ],
+      "fields": [
+        {
+          "name": "network_id",
+          "type": "TEXT",
+          "rawType": "Unique ID",
+          "presence": "required"
+        }
+      ],
+      "foreignKeys": []
+    },
+    "route_networks.txt": {
+      "filename": "route_networks.txt",
+      "fileStatus": "conditionally_forbidden",
+      "primaryKey": [
+        "route_id"
+      ],
+      "fields": [
+        {
+          "name": "network_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `networks.network_id`",
+          "presence": "required",
+          "foreignKey": {
+            "file": "networks.txt",
+            "field": "network_id"
+          }
+        },
+        {
+          "name": "route_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `routes.route_id`",
+          "presence": "required",
+          "foreignKey": {
+            "file": "routes.txt",
+            "field": "route_id"
+          }
+        }
+      ],
+      "foreignKeys": [
+        {
+          "from": "network_id",
+          "to": {
+            "file": "networks.txt",
+            "field": "network_id"
+          }
+        },
+        {
+          "from": "route_id",
+          "to": {
+            "file": "routes.txt",
+            "field": "route_id"
+          }
+        }
+      ]
+    },
+    "shapes.txt": {
+      "filename": "shapes.txt",
+      "fileStatus": "optional",
+      "primaryKey": [
+        "shape_id",
+        "shape_pt_sequence"
+      ],
+      "fields": [
+        {
+          "name": "shape_id",
+          "type": "TEXT",
+          "rawType": "ID",
+          "presence": "required"
+        },
+        {
+          "name": "shape_pt_lat",
+          "type": "REAL",
+          "rawType": "Latitude",
+          "presence": "required"
+        },
+        {
+          "name": "shape_pt_lon",
+          "type": "REAL",
+          "rawType": "Longitude",
+          "presence": "required"
+        },
+        {
+          "name": "shape_pt_sequence",
+          "type": "INTEGER",
+          "rawType": "Non-negative integer",
+          "presence": "required"
+        },
+        {
+          "name": "shape_dist_traveled",
+          "type": "REAL",
+          "rawType": "Non-negative float",
+          "presence": "optional"
+        }
+      ],
+      "foreignKeys": []
+    },
+    "frequencies.txt": {
+      "filename": "frequencies.txt",
+      "fileStatus": "optional",
+      "primaryKey": [
+        "trip_id",
+        "start_time"
+      ],
+      "fields": [
+        {
+          "name": "trip_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `trips.trip_id`",
+          "presence": "required",
+          "foreignKey": {
+            "file": "trips.txt",
+            "field": "trip_id"
+          }
+        },
+        {
+          "name": "start_time",
+          "type": "TEXT",
+          "rawType": "Time",
+          "presence": "required"
+        },
+        {
+          "name": "end_time",
+          "type": "TEXT",
+          "rawType": "Time",
+          "presence": "required"
+        },
+        {
+          "name": "headway_secs",
+          "type": "INTEGER",
+          "rawType": "Positive integer",
+          "presence": "required"
+        },
+        {
+          "name": "exact_times",
+          "type": "INTEGER",
+          "rawType": "Enum",
+          "presence": "optional"
+        }
+      ],
+      "foreignKeys": [
+        {
+          "from": "trip_id",
+          "to": {
+            "file": "trips.txt",
+            "field": "trip_id"
+          }
+        }
+      ]
+    },
+    "transfers.txt": {
+      "filename": "transfers.txt",
+      "fileStatus": "optional",
+      "primaryKey": [
+        "from_stop_id",
+        "to_stop_id",
+        "from_trip_id",
+        "to_trip_id",
+        "from_route_id",
+        "to_route_id"
+      ],
+      "fields": [
+        {
+          "name": "from_stop_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `stops.stop_id`",
+          "presence": "conditionally_required",
+          "foreignKey": {
+            "file": "stops.txt",
+            "field": "stop_id"
+          }
+        },
+        {
+          "name": "to_stop_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `stops.stop_id`",
+          "presence": "conditionally_required",
+          "foreignKey": {
+            "file": "stops.txt",
+            "field": "stop_id"
+          }
+        },
+        {
+          "name": "from_route_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `routes.route_id`",
+          "presence": "optional",
+          "foreignKey": {
+            "file": "routes.txt",
+            "field": "route_id"
+          }
+        },
+        {
+          "name": "to_route_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `routes.route_id`",
+          "presence": "optional",
+          "foreignKey": {
+            "file": "routes.txt",
+            "field": "route_id"
+          }
+        },
+        {
+          "name": "from_trip_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `trips.trip_id`",
+          "presence": "conditionally_required",
+          "foreignKey": {
+            "file": "trips.txt",
+            "field": "trip_id"
+          }
+        },
+        {
+          "name": "to_trip_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `trips.trip_id`",
+          "presence": "conditionally_required",
+          "foreignKey": {
+            "file": "trips.txt",
+            "field": "trip_id"
+          }
+        },
+        {
+          "name": "transfer_type",
+          "type": "INTEGER",
+          "rawType": "Enum",
+          "presence": "required"
+        },
+        {
+          "name": "min_transfer_time",
+          "type": "INTEGER",
+          "rawType": "Non-negative integer",
+          "presence": "optional"
+        }
+      ],
+      "foreignKeys": [
+        {
+          "from": "from_stop_id",
+          "to": {
+            "file": "stops.txt",
+            "field": "stop_id"
+          }
+        },
+        {
+          "from": "to_stop_id",
+          "to": {
+            "file": "stops.txt",
+            "field": "stop_id"
+          }
+        },
+        {
+          "from": "from_route_id",
+          "to": {
+            "file": "routes.txt",
+            "field": "route_id"
+          }
+        },
+        {
+          "from": "to_route_id",
+          "to": {
+            "file": "routes.txt",
+            "field": "route_id"
+          }
+        },
+        {
+          "from": "from_trip_id",
+          "to": {
+            "file": "trips.txt",
+            "field": "trip_id"
+          }
+        },
+        {
+          "from": "to_trip_id",
+          "to": {
+            "file": "trips.txt",
+            "field": "trip_id"
+          }
+        }
+      ]
+    },
+    "pathways.txt": {
+      "filename": "pathways.txt",
+      "fileStatus": "optional",
+      "primaryKey": [
+        "pathway_id"
+      ],
+      "fields": [
+        {
+          "name": "pathway_id",
+          "type": "TEXT",
+          "rawType": "Unique ID",
+          "presence": "required"
+        },
+        {
+          "name": "from_stop_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `stops.stop_id`",
+          "presence": "required",
+          "foreignKey": {
+            "file": "stops.txt",
+            "field": "stop_id"
+          }
+        },
+        {
+          "name": "to_stop_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `stops.stop_id`",
+          "presence": "required",
+          "foreignKey": {
+            "file": "stops.txt",
+            "field": "stop_id"
+          }
+        },
+        {
+          "name": "pathway_mode",
+          "type": "INTEGER",
+          "rawType": "Enum",
+          "presence": "required"
+        },
+        {
+          "name": "is_bidirectional",
+          "type": "INTEGER",
+          "rawType": "Enum",
+          "presence": "required"
+        },
+        {
+          "name": "length",
+          "type": "REAL",
+          "rawType": "Non-negative float",
+          "presence": "optional"
+        },
+        {
+          "name": "traversal_time",
+          "type": "INTEGER",
+          "rawType": "Positive integer",
+          "presence": "optional"
+        },
+        {
+          "name": "stair_count",
+          "type": "INTEGER",
+          "rawType": "Non-null integer",
+          "presence": "optional"
+        },
+        {
+          "name": "max_slope",
+          "type": "REAL",
+          "rawType": "Float",
+          "presence": "optional"
+        },
+        {
+          "name": "min_width",
+          "type": "REAL",
+          "rawType": "Positive float",
+          "presence": "optional"
+        },
+        {
+          "name": "signposted_as",
+          "type": "TEXT",
+          "rawType": "Text",
+          "presence": "optional"
+        },
+        {
+          "name": "reversed_signposted_as",
+          "type": "TEXT",
+          "rawType": "Text",
+          "presence": "optional"
+        }
+      ],
+      "foreignKeys": [
+        {
+          "from": "from_stop_id",
+          "to": {
+            "file": "stops.txt",
+            "field": "stop_id"
+          }
+        },
+        {
+          "from": "to_stop_id",
+          "to": {
+            "file": "stops.txt",
+            "field": "stop_id"
+          }
+        }
+      ]
+    },
+    "levels.txt": {
+      "filename": "levels.txt",
+      "fileStatus": "conditionally_required",
+      "primaryKey": [
+        "level_id"
+      ],
+      "fields": [
+        {
+          "name": "level_id",
+          "type": "TEXT",
+          "rawType": "Unique ID",
+          "presence": "required"
+        },
+        {
+          "name": "level_index",
+          "type": "REAL",
+          "rawType": "Float",
+          "presence": "required"
+        },
+        {
+          "name": "level_name",
+          "type": "TEXT",
+          "rawType": "Text",
+          "presence": "optional"
+        }
+      ],
+      "foreignKeys": []
+    },
+    "location_groups.txt": {
+      "filename": "location_groups.txt",
+      "fileStatus": "optional",
+      "primaryKey": [
+        "location_group_id"
+      ],
+      "fields": [
+        {
+          "name": "location_group_name",
+          "type": "TEXT",
+          "rawType": "Text",
+          "presence": "optional"
+        }
+      ],
+      "foreignKeys": []
+    },
+    "location_group_stops.txt": {
+      "filename": "location_group_stops.txt",
+      "fileStatus": "optional",
+      "primaryKey": [
+        "*"
+      ],
+      "fields": [
+        {
+          "name": "stop_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `stops.stop_id`",
+          "presence": "required",
+          "foreignKey": {
+            "file": "stops.txt",
+            "field": "stop_id"
+          }
+        }
+      ],
+      "foreignKeys": [
+        {
+          "from": "stop_id",
+          "to": {
+            "file": "stops.txt",
+            "field": "stop_id"
+          }
+        }
+      ]
+    },
+    "locations.geojson": {
+      "filename": "locations.geojson",
+      "fileStatus": "optional",
+      "primaryKey": [],
+      "fields": [],
+      "foreignKeys": []
+    },
+    "booking_rules.txt": {
+      "filename": "booking_rules.txt",
+      "fileStatus": "optional",
+      "primaryKey": [
+        "booking_rule_id"
+      ],
+      "fields": [
+        {
+          "name": "booking_rule_id",
+          "type": "TEXT",
+          "rawType": "Unique ID",
+          "presence": "required"
+        },
+        {
+          "name": "booking_type",
+          "type": "INTEGER",
+          "rawType": "Enum",
+          "presence": "required"
+        },
+        {
+          "name": "prior_notice_duration_min",
+          "type": "INTEGER",
+          "rawType": "Integer",
+          "presence": "conditionally_required"
+        },
+        {
+          "name": "prior_notice_duration_max",
+          "type": "INTEGER",
+          "rawType": "Integer",
+          "presence": "conditionally_forbidden"
+        },
+        {
+          "name": "prior_notice_last_day",
+          "type": "INTEGER",
+          "rawType": "Integer",
+          "presence": "conditionally_required"
+        },
+        {
+          "name": "prior_notice_last_time",
+          "type": "TEXT",
+          "rawType": "Time",
+          "presence": "conditionally_required"
+        },
+        {
+          "name": "prior_notice_start_day",
+          "type": "INTEGER",
+          "rawType": "Integer",
+          "presence": "conditionally_forbidden"
+        },
+        {
+          "name": "prior_notice_start_time",
+          "type": "TEXT",
+          "rawType": "Time",
+          "presence": "conditionally_required"
+        },
+        {
+          "name": "prior_notice_service_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `calendar.service_id`",
+          "presence": "conditionally_forbidden",
+          "foreignKey": {
+            "file": "calendar.txt",
+            "field": "service_id"
+          }
+        },
+        {
+          "name": "message",
+          "type": "TEXT",
+          "rawType": "Text",
+          "presence": "optional"
+        },
+        {
+          "name": "pickup_message",
+          "type": "TEXT",
+          "rawType": "Text",
+          "presence": "optional"
+        },
+        {
+          "name": "drop_off_message",
+          "type": "TEXT",
+          "rawType": "Text",
+          "presence": "optional"
+        },
+        {
+          "name": "phone_number",
+          "type": "TEXT",
+          "rawType": "Phone number",
+          "presence": "optional"
+        },
+        {
+          "name": "info_url",
+          "type": "TEXT",
+          "rawType": "URL",
+          "presence": "optional"
+        },
+        {
+          "name": "booking_url",
+          "type": "TEXT",
+          "rawType": "URL",
+          "presence": "optional"
+        }
+      ],
+      "foreignKeys": [
+        {
+          "from": "prior_notice_service_id",
+          "to": {
+            "file": "calendar.txt",
+            "field": "service_id"
+          }
+        }
+      ]
+    },
+    "translations.txt": {
+      "filename": "translations.txt",
+      "fileStatus": "optional",
+      "primaryKey": [
+        "table_name",
+        "field_name",
+        "language",
+        "record_id",
+        "record_sub_id",
+        "field_value"
+      ],
+      "fields": [
+        {
+          "name": "table_name",
+          "type": "INTEGER",
+          "rawType": "Enum",
+          "presence": "required"
+        },
+        {
+          "name": "field_name",
+          "type": "TEXT",
+          "rawType": "Text",
+          "presence": "required"
+        },
+        {
+          "name": "language",
+          "type": "TEXT",
+          "rawType": "Language code",
+          "presence": "required"
+        },
+        {
+          "name": "translation",
+          "type": "TEXT",
+          "rawType": "Text or URL or Email or Phone number",
+          "presence": "required"
+        },
+        {
+          "name": "record_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID",
+          "presence": "conditionally_required"
+        },
+        {
+          "name": "record_sub_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID",
+          "presence": "conditionally_required"
+        },
+        {
+          "name": "field_value",
+          "type": "TEXT",
+          "rawType": "Text or URL or Email or Phone number",
+          "presence": "conditionally_required"
+        }
+      ],
+      "foreignKeys": []
+    },
+    "feed_info.txt": {
+      "filename": "feed_info.txt",
+      "fileStatus": "conditionally_required",
+      "primaryKey": [
+        "none"
+      ],
+      "fields": [
+        {
+          "name": "feed_publisher_name",
+          "type": "TEXT",
+          "rawType": "Text",
+          "presence": "required"
+        },
+        {
+          "name": "feed_publisher_url",
+          "type": "TEXT",
+          "rawType": "URL",
+          "presence": "required"
+        },
+        {
+          "name": "feed_lang",
+          "type": "TEXT",
+          "rawType": "Language code",
+          "presence": "required"
+        },
+        {
+          "name": "default_lang",
+          "type": "TEXT",
+          "rawType": "Language code",
+          "presence": "optional"
+        },
+        {
+          "name": "feed_start_date",
+          "type": "TEXT",
+          "rawType": "Date",
+          "presence": "recommended"
+        },
+        {
+          "name": "feed_end_date",
+          "type": "TEXT",
+          "rawType": "Date",
+          "presence": "recommended"
+        },
+        {
+          "name": "feed_version",
+          "type": "TEXT",
+          "rawType": "Text",
+          "presence": "recommended"
+        },
+        {
+          "name": "feed_contact_email",
+          "type": "TEXT",
+          "rawType": "Email",
+          "presence": "optional"
+        },
+        {
+          "name": "feed_contact_url",
+          "type": "TEXT",
+          "rawType": "URL",
+          "presence": "optional"
+        }
+      ],
+      "foreignKeys": []
+    },
+    "attributions.txt": {
+      "filename": "attributions.txt",
+      "fileStatus": "optional",
+      "primaryKey": [
+        "attribution_id"
+      ],
+      "fields": [
+        {
+          "name": "attribution_id",
+          "type": "TEXT",
+          "rawType": "Unique ID",
+          "presence": "optional"
+        },
+        {
+          "name": "agency_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `agency.agency_id`",
+          "presence": "optional",
+          "foreignKey": {
+            "file": "agency.txt",
+            "field": "agency_id"
+          }
+        },
+        {
+          "name": "route_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `routes.route_id`",
+          "presence": "optional",
+          "foreignKey": {
+            "file": "routes.txt",
+            "field": "route_id"
+          }
+        },
+        {
+          "name": "trip_id",
+          "type": "TEXT",
+          "rawType": "Foreign ID referencing `trips.trip_id`",
+          "presence": "optional",
+          "foreignKey": {
+            "file": "trips.txt",
+            "field": "trip_id"
+          }
+        },
+        {
+          "name": "organization_name",
+          "type": "TEXT",
+          "rawType": "Text",
+          "presence": "required"
+        },
+        {
+          "name": "is_producer",
+          "type": "INTEGER",
+          "rawType": "Enum",
+          "presence": "optional"
+        },
+        {
+          "name": "is_operator",
+          "type": "INTEGER",
+          "rawType": "Enum",
+          "presence": "optional"
+        },
+        {
+          "name": "is_authority",
+          "type": "INTEGER",
+          "rawType": "Enum",
+          "presence": "optional"
+        },
+        {
+          "name": "attribution_url",
+          "type": "TEXT",
+          "rawType": "URL",
+          "presence": "optional"
+        },
+        {
+          "name": "attribution_email",
+          "type": "TEXT",
+          "rawType": "Email",
+          "presence": "optional"
+        },
+        {
+          "name": "attribution_phone",
+          "type": "TEXT",
+          "rawType": "Phone number",
+          "presence": "optional"
+        }
+      ],
+      "foreignKeys": [
+        {
+          "from": "agency_id",
+          "to": {
+            "file": "agency.txt",
+            "field": "agency_id"
+          }
+        },
+        {
+          "from": "route_id",
+          "to": {
+            "file": "routes.txt",
+            "field": "route_id"
+          }
+        },
+        {
+          "from": "trip_id",
+          "to": {
+            "file": "trips.txt",
+            "field": "trip_id"
+          }
+        }
+      ]
+    }
+  }
+}

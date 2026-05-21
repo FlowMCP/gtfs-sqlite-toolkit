@@ -1,0 +1,25 @@
+{
+    "name": "gtfs-sqlite-toolkit",
+    "version": "0.1.0",
+    "type": "module",
+    "main": "src/index.mjs",
+    "license": "MIT",
+    "engines": {
+        "node": ">=22.0.0"
+    },
+    "scripts": {
+        "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --passWithNoTests",
+        "test:coverage:src": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage --passWithNoTests",
+        "test:manual": "node tests/manual/run-all.mjs"
+    },
+    "dependencies": {
+        "better-sqlite3": "^11.10.0",
+        "tar": "^7.4.3",
+        "yauzl": "^3.2.0"
+    },
+    "devDependencies": {
+        "@types/node": "^22.10.0",
+        "jest": "^30.0.0",
+        "yazl": "^3.3.1"
+    }
+}
