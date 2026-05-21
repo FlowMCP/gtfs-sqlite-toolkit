@@ -3,5 +3,12 @@ coverage/
 .DS_Store
 *.db
 *.db.new
+*.db-shm
+*.db-wal
 *.log
 tests/manual/data/
+
+# Memo 051: synthetic GTFS fixture build artifact (explicit for readability;
+# already covered by the global *.db pattern above). The CSVs in source/ are
+# tracked (CC0).
+tests/fixtures/synthetic-gtfs/synthetic-gtfs.db

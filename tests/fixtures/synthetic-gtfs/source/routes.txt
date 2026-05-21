@@ -1,0 +1,3 @@
+route_id,agency_id,route_short_name,route_long_name,route_type
+R1,DEMO,Linie-1,Demo Bus Linie,3
+R2,DEMO,Linie-2,Demo Tram Linie,0

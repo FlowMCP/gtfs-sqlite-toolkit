@@ -1,0 +1,6 @@
+stop_id,stop_name,stop_lat,stop_lon,location_type
+DEMO-BHF,Demo-Bahnhof,52.0000,13.0000,0
+DEMO-MIT,Demo-Mitte,52.0050,13.0050,0
+DEMO-PRK,Demo-Park,52.0100,13.0100,0
+DEMO-KLI,Demo-Klinik,52.0150,13.0150,0
+DEMO-SEE,Demo-See,52.0200,13.0200,0

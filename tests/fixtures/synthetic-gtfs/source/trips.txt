@@ -1,0 +1,7 @@
+route_id,service_id,trip_id,shape_id
+R1,S-WD,T1A,SHP1
+R1,S-WD,T1B,SHP1
+R1,S-SAT,T1C,SHP1
+R2,S-WD,T2A,SHP2
+R2,S-WD,T2B,SHP2
+R2,S-SUN,T2C,SHP2
