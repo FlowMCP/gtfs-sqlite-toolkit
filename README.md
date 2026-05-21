@@ -10,8 +10,12 @@ Convert GTFS Schedule feeds (CSV in ZIP) to queryable SQLite databases with qual
 
 ## Quickstart
 
+This toolkit is published as a GitHub repo, **not** on the npm registry. Install via the GitHub shorthand:
+
 ```bash
-npm install gtfs-sqlite-toolkit
+npm install github:FlowMCP/gtfs-sqlite-toolkit
+# or pin to a release:
+npm install github:FlowMCP/gtfs-sqlite-toolkit#v0.1.0
 ```
 
 ```javascript
@@ -179,10 +183,12 @@ Local development:
 ```bash
 git clone https://github.com/FlowMCP/gtfs-sqlite-toolkit
 cd gtfs-sqlite-toolkit
-npm install
+npm install         # installs dev + runtime deps; uses git source, not npm registry
 npm test
 npm run test:coverage:src
 ```
+
+**Note:** This package is **not** on the npm registry. Distribution is via GitHub only (`github:FlowMCP/gtfs-sqlite-toolkit`).
 
 Manual POC scripts (need real data, see `tests/manual/run-*.mjs`):
 
