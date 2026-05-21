@@ -10,6 +10,105 @@ Convert GTFS Schedule feeds (CSV in ZIP) to queryable SQLite databases with qual
 
 > **Calibrated against the official GTFS Schedule Reference** ([gtfs.org/documentation/schedule/reference/](https://gtfs.org/documentation/schedule/reference/)), source-of-truth Markdown at [github.com/google/transit](https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md). Spec revision tracked: **2026-04-27** (downloaded on 2026-05-21). All 32 schedule files, 214 fields, and 52 foreign-key relations are derived from that exact snapshot — see [`src/converters/schedule/spec/spec-reference-2026-04-27.json`](src/converters/schedule/spec/spec-reference-2026-04-27.json) and the [GTFS Schedule Reference](#gtfs-schedule-reference) section below.
 
+## FlowMCP Integration
+
+### Overview
+
+This toolkit is the first **FlowMCP add-on**: it converts GTFS feeds into a sealed SQLite resource that any FlowMCP schema can declare via `source: 'sqlite-gtfs'` (FlowMCP Spec v4.1.0). The schema points at a converted DB, and the FlowMCP-CLI auto-injects a curated set of GTFS tools by reading the quality seal and capability matrix the converter has written into the `meta` table.
+
+The toolkit is distributed as a GitHub repository — **not** via the npm registry. See [Import](#import) below.
+
+### Schema Example
+
+```javascript
+export const schema = {
+    namespace: 'gtfsde',
+    name: 'gtfsde-transit-v2',
+    version: '2.0.0',
+    main: {
+        resources: [
+            {
+                source:       'sqlite-gtfs',
+                mode:         'file-based',
+                path:         '${FLOWMCP_RESOURCES}/gtfs-de.db',
+                addon:        'gtfs-sqlite-toolkit',
+                addonVersion: '>=0.1.0',
+                addonSource:  'github:FlowMCP/gtfs-sqlite-toolkit'
+            }
+        ],
+        tools: [
+            // OPTIONAL: schema-specific tools here.
+            // Default GTFS tools are injected automatically (see Auto-Tools below).
+        ]
+    }
+}
+```
+
+`${FLOWMCP_RESOURCES}` resolves to the env var of the same name, with the default `~/.flowmcp/resources/`. Provider GTFS data is never shipped in this repository — users place their converted DB under that path locally.
+
+### Import
+
+```bash
+# Latest from main
+npm install github:FlowMCP/gtfs-sqlite-toolkit
+
+# Pin to a release
+npm install github:FlowMCP/gtfs-sqlite-toolkit#v0.1.0
+```
+
+> **Not on the npm registry.** The package is distributed via GitHub only. Use the `github:FlowMCP/gtfs-sqlite-toolkit` shorthand in your `package.json` dependencies.
+
+### Auto-Tools
+
+When FlowMCP-CLI accepts a `source: 'sqlite-gtfs'` resource it auto-injects the following tools (subject to the converted feed's capability matrix):
+
+- `searchStops` — full-text search over `stops` (requires `basicLookup`)
+- `searchRoutes` — exact name lookup over `routes` (requires `basicLookup`)
+- `getDepartures` — upcoming departures per stop (requires `departures`)
+- `getShapeForRoute` — shape points for visualization (requires `shapesVisualization` + `routing`)
+- `getFlexBookingRules` — booking rule lookup for flex/demand-responsive services (requires `flexService`)
+
+Tool names are prefixed with the schema namespace (e.g. `gtfsde.searchStops`). When a capability is missing from the converted DB, the corresponding tool is omitted.
+
+### Capability Matrix
+
+The auto-tool list is filtered by the 12-boolean capability matrix detected at conversion time. See [Capability Matrix](#capability-matrix) below for the full list and trigger files.
+
+### Seal Verification
+
+Before auto-injection the CLI calls `FlowMcpAdapter.verifySeal( { dbPath } )` to make sure the database is `sqlite-gtfs`-conformant. The result has the shape `{ sealed, meta, reason? }` where `reason` is one of:
+
+| Reason | Meaning |
+|--------|---------|
+| `NO_SEAL` | `meta.qualitySeal` is missing or not `'sqlite-gtfs'`. Schema rejected with FlowMCP code `RES032`. |
+| `NO_META` | DB exists but the `meta` table is absent. Treated as `RES032` (no seal). |
+| `DB_UNREADABLE` | File missing, locked, or corrupt. CLI rejects with FlowMCP code `RES033`. |
+
+When `sealed === true`, `meta` carries the 10 mandatory keys (`qualitySeal`, `specUrl`, `specRevision`, `converterVersion`, `sourceUrl`, `sourceHash`, `buildDate`, `rowCounts`, `capabilities`, `validationReport`).
+
+### Adapter API
+
+The `FlowMcpAdapter` class exposes three static methods consumed by FlowMCP-CLI:
+
+```javascript
+import { FlowMcpAdapter } from 'gtfs-sqlite-toolkit'
+
+// 1. Seal check — first gate of `flowmcp add`
+const { sealed, meta, reason } = FlowMcpAdapter.verifySeal( { dbPath } )
+// → { sealed: boolean, meta: object | null, reason?: 'NO_SEAL' | 'NO_META' | 'DB_UNREADABLE' }
+
+// 2. Capability-filtered method catalog
+const { methods, capabilities } = FlowMcpAdapter.getAvailableMethods( { dbPath } )
+// → { methods: Array<{ name, params, sqlTemplate, outputSchema, requiresCapabilities }>,
+//     capabilities: { basicLookup: boolean, ... } }
+
+// 3. FlowMCP v4 tool definitions with namespace prefix
+const { tools } = FlowMcpAdapter.buildToolDefinitions( { dbPath, namespace: 'gtfsde' } )
+// → { tools: Array<{ name, description, inputSchema, outputSchema, requiresCapabilities, sqlTemplate }> }
+```
+
+All three methods validate their inputs and throw a descriptive `Error` for missing or malformed parameters. `namespace` must match `/^[a-z][a-z0-9-]*$/`.
+
 ## Quickstart
 
 This toolkit is published as a GitHub repo, **not** on the npm registry. Install via the GitHub shorthand:
@@ -50,6 +149,7 @@ console.log( result.report.summary ) // { errorCount, warningCount, infoCount }
 
 - [Quickstart](#quickstart)
 - [Features](#features)
+- [FlowMCP Integration](#flowmcp-integration)
 - [Methods](#methods)
 - [Examples](#examples)
 - [Capability Matrix](#capability-matrix)
