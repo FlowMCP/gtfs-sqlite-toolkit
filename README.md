@@ -243,6 +243,59 @@ const rows = db.prepare( searchStops.sqlTemplate.replace( ':query', `'Hauptbahnh
 SqliteBuilder.close( { db } )
 ```
 
+## Echte GTFS-Daten konvertieren
+
+Die in `tests/fixtures/synthetic-gtfs/` mitgelieferte Mini-Fixture (CC0) deckt alle Tests und Integration-Szenarien ab — fuer den produktiven Einsatz braucht ihr aber echte Provider-Feeds. Da GTFS-Feeds individuellen Provider-Lizenzen unterliegen und FlowMCP keine fremden Daten in seinen oeffentlichen Repos verteilt, laeuft der Weg vom Provider-Feed zur aktivierten FlowMCP-Resource in vier Schritten.
+
+1. **Feed beschaffen.** GTFS-Schedule-Feeds werden direkt vom Provider geladen — z.B. von `https://gtfs.de/de/feeds/de_full/`, regionalen Open-Data-Portalen oder Provider-eigenen Download-Seiten. Lizenz und Nutzungsbedingungen variieren je Quelle; sie zu pruefen ist Sache des Users. Dieses Repo gibt keine kuratierte Provider-Liste.
+
+2. **Konvertieren.** Den geladenen Feed in eine SQLite-DB umsetzen und den Seal-Status pruefen:
+
+   ```javascript
+   import { GtfsSqliteConverter } from 'gtfs-sqlite-toolkit'
+
+   const result = await GtfsSqliteConverter.start( {
+       input:     './gtfs-de.zip',
+       inputType: 'zip',
+       dbPath:    './gtfs-de.db'
+   } )
+
+   if( result.seal !== 'sqlite-gtfs' ) {
+       console.error( 'Seal not granted:', result.report.summary )
+       process.exit( 1 )
+   }
+   ```
+
+   Wenn der Seal `null` ist, sind Validation-Errors oder -Warnings im Feed — `result.report` enthaelt die Details. FlowMCP-CLI nimmt nur DBs mit Seal `sqlite-gtfs` an.
+
+3. **Seal verifizieren.** Vor dem Verschieben kann unabhaengig nachgeprueft werden, dass die DB FlowMCP-konform ist:
+
+   ```javascript
+   import { FlowMcpAdapter } from 'gtfs-sqlite-toolkit'
+
+   const { sealed, meta } = FlowMcpAdapter.verifySeal( { dbPath: './gtfs-de.db' } )
+   console.log( sealed, meta.qualitySeal, meta.specRevision )
+   ```
+
+   `sealed: true` heisst: die DB hat den Seal, die `meta`-Tabelle ist vollstaendig, und FlowMCP-CLI wird sie akzeptieren.
+
+4. **Ablage und Aktivierung.** Die DB in das Resource-Verzeichnis verschieben und das Schema aktivieren:
+
+   ```bash
+   mv ./gtfs-de.db ~/.flowmcp/resources/gtfs-de.db
+   flowmcp add gtfsde-transit-v2
+   ```
+
+   `~/.flowmcp/resources/` ist der Default-Aufloesungs-Ort fuer `${FLOWMCP_RESOURCES}`. Wer einen anderen Pfad nutzen will, setzt `export FLOWMCP_RESOURCES=/anderer/pfad` und verschiebt die DB entsprechend.
+
+### Lizenz-Hinweis
+
+Provider-GTFS-Daten haben individuelle Lizenzen. Das Repo enthaelt **ausschliesslich** die Synthetic-Fixture unter `tests/fixtures/synthetic-gtfs/` (CC0). Provider-Daten gehoeren niemals ins Repo — das Pre-Push-Skript [`scripts/check-no-provider-data.sh`](scripts/check-no-provider-data.sh) bricht Commits ab, die solche Daten enthalten. Wer Schemas oder Tools beitraegt, liefert nur Code und Pfad-Variablen, niemals den Feed selbst.
+
+### Synthetic-Fixture als Ausgangspunkt
+
+Fuer Entwicklung und CI gibt es die Mini-GTFS-Fixture unter `tests/fixtures/synthetic-gtfs/`. Sie deckt alle 12 Capabilities ab und ist CC0-lizenziert — beliebig nutzbar. Die Fixture wird via [`tests/fixtures/build-fixture.mjs`](tests/fixtures/build-fixture.mjs) regeneriert.
+
 ## Capability Matrix
 
 The converter detects 12 boolean capabilities from a feed's file inventory:
