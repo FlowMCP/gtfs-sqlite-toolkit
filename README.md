@@ -1,12 +1,24 @@
-# gtfs-sqlite-toolkit
+# geo-gtfs-toolkit
 
-<!-- Badges (License, Node, Workflow, Coverage) — werden aktiv nach Live-Schaltung -->
+<!-- Badges (License, Node, Workflow, Coverage) — enabled after going public -->
 <!-- ![License](https://img.shields.io/github/license/FlowMCP/gtfs-sqlite-toolkit) -->
 <!-- ![Node](https://img.shields.io/badge/node-22-blue) -->
 <!-- ![Workflow](https://img.shields.io/github/actions/workflow/status/FlowMCP/gtfs-sqlite-toolkit/test-on-push.yml) -->
 <!-- ![Coverage](https://img.shields.io/codecov/c/github/FlowMCP/gtfs-sqlite-toolkit) -->
 
 Convert GTFS Schedule feeds (CSV in ZIP) to queryable SQLite databases with quality seal, capability detection, and reusable default queries.
+
+This add-on is part of the FlowMCP geo add-on family (`geo-geojson-toolkit` /
+`geo-csv-tsv-toolkit` / `gtfs-sqlite-toolkit` / `geo-overpass-toolkit`). It shares
+the common geo spatial methods — `nearPoint`, `inBoundingBox` (over `stops`) —
+and adds GTFS-specific methods (`searchStops`, `searchRoutes`, `getDepartures`,
+`getShapeForRoute`, `getFlexBookingRules`).
+
+## Runtime category
+
+**sealed-SQLite** (on-disk database with a quality seal). Unlike the In-Memory
+add-ons (`geo-geojson-toolkit` / `geo-csv-tsv-toolkit`), the GTFS feed is
+converted once into a sealed `.db` file and queried from disk.
 
 > **Calibrated against the official GTFS Schedule Reference** ([gtfs.org/documentation/schedule/reference/](https://gtfs.org/documentation/schedule/reference/)), source-of-truth Markdown at [github.com/google/transit](https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md). Spec revision tracked: **2026-04-27** (downloaded on 2026-05-21). All 32 schedule files, 214 fields, and 52 foreign-key relations are derived from that exact snapshot — see [`src/converters/schedule/spec/spec-reference-2026-04-27.json`](src/converters/schedule/spec/spec-reference-2026-04-27.json) and the [GTFS Schedule Reference](#gtfs-schedule-reference) section below.
 
@@ -31,7 +43,7 @@ export const schema = {
                 source:       'sqlite-gtfs',
                 mode:         'file-based',
                 path:         '${FLOWMCP_RESOURCES}/gtfs-de.db',
-                addon:        'gtfs-sqlite-toolkit',
+                addon:        'geo-gtfs-toolkit',
                 addonVersion: '>=0.1.0',
                 addonSource:  'github:FlowMCP/gtfs-sqlite-toolkit'
             }
@@ -95,7 +107,7 @@ When `sealed === true`, `meta` carries the 10 mandatory keys (`qualitySeal`, `sp
 The `FlowMcpAdapter` class exposes three static methods consumed by FlowMCP-CLI:
 
 ```javascript
-import { FlowMcpAdapter } from 'gtfs-sqlite-toolkit'
+import { FlowMcpAdapter } from 'geo-gtfs-toolkit'
 
 // 1. Seal check — first gate of `flowmcp add`
 const { sealed, meta, reason } = FlowMcpAdapter.verifySeal( { dbPath } )
@@ -124,7 +136,7 @@ npm install github:FlowMCP/gtfs-sqlite-toolkit#v0.1.0
 ```
 
 ```javascript
-import { GtfsSqliteConverter } from 'gtfs-sqlite-toolkit'
+import { GtfsSqliteConverter } from 'geo-gtfs-toolkit'
 
 const result = await GtfsSqliteConverter.start( {
     input:     './my-feed.zip',
@@ -236,7 +248,7 @@ const result = await GtfsSqliteConverter.start( {
 ### Using default methods
 
 ```javascript
-import { GtfsSqliteConverter, ScheduleDefaultMethods, ScheduleMetadataSchema, SqliteBuilder } from 'gtfs-sqlite-toolkit'
+import { GtfsSqliteConverter, ScheduleDefaultMethods, ScheduleMetadataSchema, SqliteBuilder } from 'geo-gtfs-toolkit'
 
 const { capabilities, dbPath } = await GtfsSqliteConverter.start( { input: './feed.zip', dbPath: './x.db' } )
 const methods = ScheduleDefaultMethods.getMethodsForCapabilities( { capabilities } )
@@ -247,16 +259,24 @@ const rows = db.prepare( searchStops.sqlTemplate.replace( ':query', `'Hauptbahnh
 SqliteBuilder.close( { db } )
 ```
 
-## Echte GTFS-Daten konvertieren
+## Converting real GTFS data
 
-Die in `tests/fixtures/synthetic-gtfs/` mitgelieferte Mini-Fixture (CC0) deckt alle Tests und Integration-Szenarien ab — fuer den produktiven Einsatz braucht ihr aber echte Provider-Feeds. Da GTFS-Feeds individuellen Provider-Lizenzen unterliegen und FlowMCP keine fremden Daten in seinen oeffentlichen Repos verteilt, laeuft der Weg vom Provider-Feed zur aktivierten FlowMCP-Resource in vier Schritten.
+The mini fixture shipped under `tests/fixtures/synthetic-gtfs/` (CC0) covers all
+tests and integration scenarios — but for production use you need real provider
+feeds. Because GTFS feeds carry individual provider licenses and FlowMCP never
+ships foreign data in its public repos, the path from a provider feed to an
+activated FlowMCP resource has four steps.
 
-1. **Feed beschaffen.** GTFS-Schedule-Feeds werden direkt vom Provider geladen — z.B. von `https://gtfs.de/de/feeds/de_full/`, regionalen Open-Data-Portalen oder Provider-eigenen Download-Seiten. Lizenz und Nutzungsbedingungen variieren je Quelle; sie zu pruefen ist Sache des Users. Dieses Repo gibt keine kuratierte Provider-Liste.
+1. **Obtain the feed.** GTFS Schedule feeds are downloaded directly from the
+   provider — e.g. from `https://gtfs.de/de/feeds/de_full/`, regional open-data
+   portals, or a provider's own download pages. License and terms of use vary by
+   source; checking them is the user's responsibility. This repo ships no curated
+   provider list.
 
-2. **Konvertieren.** Den geladenen Feed in eine SQLite-DB umsetzen und den Seal-Status pruefen:
+2. **Convert.** Turn the downloaded feed into a SQLite DB and check the seal status:
 
    ```javascript
-   import { GtfsSqliteConverter } from 'gtfs-sqlite-toolkit'
+   import { GtfsSqliteConverter } from 'geo-gtfs-toolkit'
 
    const result = await GtfsSqliteConverter.start( {
        input:     './gtfs-de.zip',
@@ -270,35 +290,51 @@ Die in `tests/fixtures/synthetic-gtfs/` mitgelieferte Mini-Fixture (CC0) deckt a
    }
    ```
 
-   Wenn der Seal `null` ist, sind Validation-Errors oder -Warnings im Feed — `result.report` enthaelt die Details. FlowMCP-CLI nimmt nur DBs mit Seal `sqlite-gtfs` an.
+   When the seal is `null`, the feed contains validation errors or warnings —
+   `result.report` holds the details. FlowMCP-CLI only accepts DBs with the
+   `sqlite-gtfs` seal.
 
-3. **Seal verifizieren.** Vor dem Verschieben kann unabhaengig nachgeprueft werden, dass die DB FlowMCP-konform ist:
+3. **Verify the seal.** Before moving the file you can independently confirm the
+   DB is FlowMCP-conformant:
 
    ```javascript
-   import { FlowMcpAdapter } from 'gtfs-sqlite-toolkit'
+   import { FlowMcpAdapter } from 'geo-gtfs-toolkit'
 
    const { sealed, meta } = FlowMcpAdapter.verifySeal( { dbPath: './gtfs-de.db' } )
    console.log( sealed, meta.qualitySeal, meta.specRevision )
    ```
 
-   `sealed: true` heisst: die DB hat den Seal, die `meta`-Tabelle ist vollstaendig, und FlowMCP-CLI wird sie akzeptieren.
+   `sealed: true` means: the DB has the seal, the `meta` table is complete, and
+   FlowMCP-CLI will accept it.
 
-4. **Ablage und Aktivierung.** Die DB in das Resource-Verzeichnis verschieben und das Schema aktivieren:
+4. **Placement and activation.** Move the DB into the resource directory and let a
+   FlowMCP schema declare it:
 
    ```bash
    mv ./gtfs-de.db ~/.flowmcp/resources/gtfs-de.db
-   flowmcp add gtfsde-transit-v2
    ```
 
-   `~/.flowmcp/resources/` ist der Default-Aufloesungs-Ort fuer `${FLOWMCP_RESOURCES}`. Wer einen anderen Pfad nutzen will, setzt `export FLOWMCP_RESOURCES=/anderer/pfad` und verschiebt die DB entsprechend.
+   `~/.flowmcp/resources/` is the default resolution path for
+   `${FLOWMCP_RESOURCES}`. To use a different path, set
+   `export FLOWMCP_RESOURCES=/other/path` and move the DB accordingly. A schema
+   that references the DB via `source: 'sqlite-gtfs'` then exposes the GTFS tools
+   through the standard FlowMCP `list` / `call` workflow.
 
-### Lizenz-Hinweis
+### License note
 
-Provider-GTFS-Daten haben individuelle Lizenzen. Das Repo enthaelt **ausschliesslich** die Synthetic-Fixture unter `tests/fixtures/synthetic-gtfs/` (CC0). Provider-Daten gehoeren niemals ins Repo — das Pre-Push-Skript [`scripts/check-no-provider-data.sh`](scripts/check-no-provider-data.sh) bricht Commits ab, die solche Daten enthalten. Wer Schemas oder Tools beitraegt, liefert nur Code und Pfad-Variablen, niemals den Feed selbst.
+Provider GTFS data carries individual licenses. This repo contains **only** the
+synthetic fixture under `tests/fixtures/synthetic-gtfs/` (CC0). Provider data must
+never enter the repo — the pre-push script
+[`scripts/check-no-provider-data.sh`](scripts/check-no-provider-data.sh) aborts
+commits that contain such data. Contributors ship only code and path variables,
+never the feed itself.
 
-### Synthetic-Fixture als Ausgangspunkt
+### Synthetic fixture as a starting point
 
-Fuer Entwicklung und CI gibt es die Mini-GTFS-Fixture unter `tests/fixtures/synthetic-gtfs/`. Sie deckt alle 12 Capabilities ab und ist CC0-lizenziert — beliebig nutzbar. Die Fixture wird via [`tests/fixtures/build-fixture.mjs`](tests/fixtures/build-fixture.mjs) regeneriert.
+For development and CI there is the mini GTFS fixture under
+`tests/fixtures/synthetic-gtfs/`. It covers all 12 capabilities and is CC0-licensed
+— free to use. The fixture is regenerated via
+[`tests/fixtures/build-fixture.mjs`](tests/fixtures/build-fixture.mjs).
 
 ## Capability Matrix
 
