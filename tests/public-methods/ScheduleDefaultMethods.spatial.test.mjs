@@ -53,6 +53,11 @@ const FIXTURE_ROWS = [
 ]
 
 
+// Helpers to read the FeatureCollection (RFC 7946) output shape.
+const idsOf = ( fc ) => fc.features.map( ( f ) => f.properties.stop_id )
+const featureById = ( fc, id ) => fc.features.find( ( f ) => f.properties.stop_id === id )
+
+
 afterEach( () => {
     if( tmpDir && existsSync( tmpDir ) ) {
         rmSync( tmpDir, { recursive: true, force: true } )
@@ -62,37 +67,58 @@ afterEach( () => {
 
 
 describe( 'ScheduleDefaultMethods spatial — nearPoint', () => {
-    test( 'returns nearest-first with distanceM, respects radius', () => {
+    test( 'returns a FeatureCollection nearest-first with _distanceMeters, respects radius', () => {
         const { db } = buildStopsDb( { rows: FIXTURE_ROWS } )
-        const { stops } = ScheduleDefaultMethods.nearPoint( {
+        const fc = ScheduleDefaultMethods.nearPoint( {
             db, lat: BERLIN_HBF.lat, lon: BERLIN_HBF.lon, radiusMeters: 2000
         } )
         SqliteBuilder.close( { db } )
 
-        const ids = stops.map( ( s ) => s.stop_id )
+        expect( fc.type ).toBe( 'FeatureCollection' )
+        expect( fc.meta ).toEqual( { count: 3, source: 'gtfs-de' } )
+        expect( fc.meta.count ).toBe( fc.features.length )
+
+        const ids = idsOf( fc )
         expect( ids ).toEqual( [ 'hbf', 'east', 'fri' ] )
-        expect( stops[ 0 ].distanceM ).toBe( 0 )
+        expect( fc.features[ 0 ].properties._distanceMeters ).toBe( 0 )
         // ascending order
-        expect( stops[ 0 ].distanceM ).toBeLessThanOrEqual( stops[ 1 ].distanceM )
-        expect( stops[ 1 ].distanceM ).toBeLessThanOrEqual( stops[ 2 ].distanceM )
+        expect( fc.features[ 0 ].properties._distanceMeters )
+            .toBeLessThanOrEqual( fc.features[ 1 ].properties._distanceMeters )
+        expect( fc.features[ 1 ].properties._distanceMeters )
+            .toBeLessThanOrEqual( fc.features[ 2 ].properties._distanceMeters )
         // Munich (far) and the null-coordinate stop are excluded
         expect( ids ).not.toContain( 'far' )
         expect( ids ).not.toContain( 'null' )
     } )
 
 
-    test( 'distanceM matches GeoJSON reference Haversine within < 1m', () => {
+    test( 'each feature is RFC 7946 with lon-first coordinates', () => {
         const { db } = buildStopsDb( { rows: FIXTURE_ROWS } )
-        const { stops } = ScheduleDefaultMethods.nearPoint( {
+        const fc = ScheduleDefaultMethods.nearPoint( {
             db, lat: BERLIN_HBF.lat, lon: BERLIN_HBF.lon, radiusMeters: 2000
         } )
         SqliteBuilder.close( { db } )
 
-        const fri = stops.find( ( s ) => s.stop_id === 'fri' )
+        const east = featureById( fc, 'east' )
+        expect( east.type ).toBe( 'Feature' )
+        expect( east.geometry.type ).toBe( 'Point' )
+        expect( east.geometry.coordinates ).toEqual( [ 13.370548, 52.525589 ] )
+        expect( east.properties._source ).toBe( 'gtfs-de' )
+    } )
+
+
+    test( '_distanceMeters matches GeoJSON reference Haversine within < 1m', () => {
+        const { db } = buildStopsDb( { rows: FIXTURE_ROWS } )
+        const fc = ScheduleDefaultMethods.nearPoint( {
+            db, lat: BERLIN_HBF.lat, lon: BERLIN_HBF.lon, radiusMeters: 2000
+        } )
+        SqliteBuilder.close( { db } )
+
+        const fri = featureById( fc, 'fri' )
         const expected = referenceHaversineM( {
             lat1: BERLIN_HBF.lat, lon1: BERLIN_HBF.lon, lat2: 52.520008, lon2: 13.387091
         } )
-        expect( Math.abs( fri.distanceM - expected ) ).toBeLessThan( 1 )
+        expect( Math.abs( fri.properties._distanceMeters - expected ) ).toBeLessThan( 1 )
     } )
 
 
@@ -105,30 +131,31 @@ describe( 'ScheduleDefaultMethods spatial — nearPoint', () => {
             db, lat: BERLIN_HBF.lat, lon: BERLIN_HBF.lon, radiusMeters: 2000
         } )
         SqliteBuilder.close( { db } )
-        expect( small.stops.length ).toBeLessThan( large.stops.length )
-        expect( small.stops.map( ( s ) => s.stop_id ) ).toEqual( [ 'hbf', 'east' ] )
+        expect( small.features.length ).toBeLessThan( large.features.length )
+        expect( idsOf( small ) ).toEqual( [ 'hbf', 'east' ] )
     } )
 
 
     test( 'respects limit', () => {
         const { db } = buildStopsDb( { rows: FIXTURE_ROWS } )
-        const { stops } = ScheduleDefaultMethods.nearPoint( {
+        const fc = ScheduleDefaultMethods.nearPoint( {
             db, lat: BERLIN_HBF.lat, lon: BERLIN_HBF.lon, radiusMeters: 2000, limit: 1
         } )
         SqliteBuilder.close( { db } )
-        expect( stops.length ).toBe( 1 )
-        expect( stops[ 0 ].stop_id ).toBe( 'hbf' )
+        expect( fc.features.length ).toBe( 1 )
+        expect( fc.meta.count ).toBe( 1 )
+        expect( fc.features[ 0 ].properties.stop_id ).toBe( 'hbf' )
     } )
 
 
-    test( 'output rows contain the expected fields', () => {
+    test( 'feature properties contain the expected fields', () => {
         const { db } = buildStopsDb( { rows: FIXTURE_ROWS } )
-        const { stops } = ScheduleDefaultMethods.nearPoint( {
+        const fc = ScheduleDefaultMethods.nearPoint( {
             db, lat: BERLIN_HBF.lat, lon: BERLIN_HBF.lon, radiusMeters: 200, limit: 1
         } )
         SqliteBuilder.close( { db } )
-        expect( Object.keys( stops[ 0 ] ).sort() ).toEqual(
-            [ 'distanceM', 'stop_id', 'stop_lat', 'stop_lon', 'stop_name' ]
+        expect( Object.keys( fc.features[ 0 ].properties ).sort() ).toEqual(
+            [ '_distanceMeters', '_source', 'stop_id', 'stop_name' ]
         )
     } )
 
@@ -160,13 +187,18 @@ describe( 'ScheduleDefaultMethods spatial — nearPoint', () => {
 
 
 describe( 'ScheduleDefaultMethods spatial — inBoundingBox', () => {
-    test( 'returns only stops inside the box (lon-first)', () => {
+    test( 'returns a FeatureCollection of stops inside the box (lon-first)', () => {
         const { db } = buildStopsDb( { rows: FIXTURE_ROWS } )
-        const { stops } = ScheduleDefaultMethods.inBoundingBox( {
+        const fc = ScheduleDefaultMethods.inBoundingBox( {
             db, minLon: 13.36, minLat: 52.51, maxLon: 13.39, maxLat: 52.53
         } )
         SqliteBuilder.close( { db } )
-        const ids = stops.map( ( s ) => s.stop_id ).sort()
+
+        expect( fc.type ).toBe( 'FeatureCollection' )
+        expect( fc.meta ).toEqual( { count: 3, source: 'gtfs-de' } )
+        expect( fc.meta.count ).toBe( fc.features.length )
+
+        const ids = idsOf( fc ).sort()
         expect( ids ).toEqual( [ 'east', 'fri', 'hbf' ] )
         // Munich is far outside
         expect( ids ).not.toContain( 'far' )
@@ -175,14 +207,40 @@ describe( 'ScheduleDefaultMethods spatial — inBoundingBox', () => {
     } )
 
 
-    test( 'boundary case — stop just outside the box is excluded', () => {
-        // Box tightly around Berlin Hbf only; 'fri' (lon 13.387) is just outside maxLon
+    test( '_distanceMeters is null for bbox results', () => {
         const { db } = buildStopsDb( { rows: FIXTURE_ROWS } )
-        const { stops } = ScheduleDefaultMethods.inBoundingBox( {
+        const fc = ScheduleDefaultMethods.inBoundingBox( {
+            db, minLon: 13.36, minLat: 52.51, maxLon: 13.39, maxLat: 52.53
+        } )
+        SqliteBuilder.close( { db } )
+        fc.features.forEach( ( f ) => {
+            expect( f.properties._distanceMeters ).toBeNull()
+            expect( f.properties._source ).toBe( 'gtfs-de' )
+        } )
+    } )
+
+
+    test( 'each feature is RFC 7946 with lon-first coordinates', () => {
+        const { db } = buildStopsDb( { rows: FIXTURE_ROWS } )
+        const fc = ScheduleDefaultMethods.inBoundingBox( {
             db, minLon: 13.369, minLat: 52.525, maxLon: 13.371, maxLat: 52.526
         } )
         SqliteBuilder.close( { db } )
-        const ids = stops.map( ( s ) => s.stop_id ).sort()
+        const east = featureById( fc, 'east' )
+        expect( east.type ).toBe( 'Feature' )
+        expect( east.geometry.type ).toBe( 'Point' )
+        expect( east.geometry.coordinates ).toEqual( [ 13.370548, 52.525589 ] )
+    } )
+
+
+    test( 'boundary case — stop just outside the box is excluded', () => {
+        // Box tightly around Berlin Hbf only; 'fri' (lon 13.387) is just outside maxLon
+        const { db } = buildStopsDb( { rows: FIXTURE_ROWS } )
+        const fc = ScheduleDefaultMethods.inBoundingBox( {
+            db, minLon: 13.369, minLat: 52.525, maxLon: 13.371, maxLat: 52.526
+        } )
+        SqliteBuilder.close( { db } )
+        const ids = idsOf( fc ).sort()
         expect( ids ).toEqual( [ 'east', 'hbf' ] )
         expect( ids ).not.toContain( 'fri' )
     } )
@@ -191,33 +249,34 @@ describe( 'ScheduleDefaultMethods spatial — inBoundingBox', () => {
     test( 'boundary inclusive — stop exactly on the edge is included', () => {
         const { db } = buildStopsDb( { rows: FIXTURE_ROWS } )
         // maxLon set exactly to the 'east' stop longitude
-        const { stops } = ScheduleDefaultMethods.inBoundingBox( {
+        const fc = ScheduleDefaultMethods.inBoundingBox( {
             db, minLon: 13.369548, minLat: 52.525589, maxLon: 13.370548, maxLat: 52.525589
         } )
         SqliteBuilder.close( { db } )
-        const ids = stops.map( ( s ) => s.stop_id ).sort()
+        const ids = idsOf( fc ).sort()
         expect( ids ).toEqual( [ 'east', 'hbf' ] )
     } )
 
 
     test( 'respects limit', () => {
         const { db } = buildStopsDb( { rows: FIXTURE_ROWS } )
-        const { stops } = ScheduleDefaultMethods.inBoundingBox( {
+        const fc = ScheduleDefaultMethods.inBoundingBox( {
             db, minLon: 13.36, minLat: 52.51, maxLon: 13.39, maxLat: 52.53, limit: 2
         } )
         SqliteBuilder.close( { db } )
-        expect( stops.length ).toBe( 2 )
+        expect( fc.features.length ).toBe( 2 )
+        expect( fc.meta.count ).toBe( 2 )
     } )
 
 
-    test( 'output rows contain the expected fields', () => {
+    test( 'feature properties contain the expected fields', () => {
         const { db } = buildStopsDb( { rows: FIXTURE_ROWS } )
-        const { stops } = ScheduleDefaultMethods.inBoundingBox( {
+        const fc = ScheduleDefaultMethods.inBoundingBox( {
             db, minLon: 13.369, minLat: 52.525, maxLon: 13.371, maxLat: 52.526
         } )
         SqliteBuilder.close( { db } )
-        expect( Object.keys( stops[ 0 ] ).sort() ).toEqual(
-            [ 'stop_id', 'stop_lat', 'stop_lon', 'stop_name' ]
+        expect( Object.keys( fc.features[ 0 ].properties ).sort() ).toEqual(
+            [ '_distanceMeters', '_source', 'stop_id', 'stop_name' ]
         )
     } )
 
