@@ -49,25 +49,27 @@ const buildDbWithCaps = ( { dbPath, capabilities } ) => {
 
 
 describe( 'FlowMcpAdapter.getAvailableMethods', () => {
-    test( 'returns all 5 methods when every capability is true', () => {
+    test( 'returns all 7 methods when every capability is true', () => {
         tmpDir = mkdtempSync( join( tmpdir(), 'fmcp-getmethods-full-' ) )
         const dbPath = join( tmpDir, 'full.db' )
         buildDbWithCaps( { dbPath, capabilities: FULL_CAPS } )
 
         const { methods, capabilities } = FlowMcpAdapter.getAvailableMethods( { dbPath } )
 
-        expect( methods.length ).toBe( 5 )
+        expect( methods.length ).toBe( 7 )
         const methodNames = methods.map( ( m ) => m.name )
         expect( methodNames ).toContain( 'searchStops' )
         expect( methodNames ).toContain( 'searchRoutes' )
         expect( methodNames ).toContain( 'getDepartures' )
         expect( methodNames ).toContain( 'getShapeForRoute' )
         expect( methodNames ).toContain( 'getFlexBookingRules' )
+        expect( methodNames ).toContain( 'nearPoint' )
+        expect( methodNames ).toContain( 'inBoundingBox' )
         expect( capabilities.basicLookup ).toBe( true )
     } )
 
 
-    test( 'returns 2 methods when only basicLookup is true', () => {
+    test( 'returns 4 methods when only basicLookup is true', () => {
         tmpDir = mkdtempSync( join( tmpdir(), 'fmcp-getmethods-basic-' ) )
         const dbPath = join( tmpDir, 'basic.db' )
         const caps = { ...FULL_CAPS }
@@ -79,10 +81,12 @@ describe( 'FlowMcpAdapter.getAvailableMethods', () => {
 
         const { methods } = FlowMcpAdapter.getAvailableMethods( { dbPath } )
 
-        expect( methods.length ).toBe( 2 )
+        expect( methods.length ).toBe( 4 )
         const names = methods.map( ( m ) => m.name )
         expect( names ).toContain( 'searchStops' )
         expect( names ).toContain( 'searchRoutes' )
+        expect( names ).toContain( 'nearPoint' )
+        expect( names ).toContain( 'inBoundingBox' )
     } )
 
 

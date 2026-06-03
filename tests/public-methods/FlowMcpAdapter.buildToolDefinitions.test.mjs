@@ -49,14 +49,14 @@ const buildDbWithCaps = ( { dbPath, capabilities } ) => {
 
 
 describe( 'FlowMcpAdapter.buildToolDefinitions', () => {
-    test( 'returns 5 tools when all capabilities are enabled', () => {
+    test( 'returns 7 tools when all capabilities are enabled', () => {
         tmpDir = mkdtempSync( join( tmpdir(), 'fmcp-buildtools-full-' ) )
         const dbPath = join( tmpDir, 'full.db' )
         buildDbWithCaps( { dbPath, capabilities: FULL_CAPS } )
 
         const { tools } = FlowMcpAdapter.buildToolDefinitions( { dbPath, namespace: 'gtfsde' } )
 
-        expect( tools.length ).toBe( 5 )
+        expect( tools.length ).toBe( 7 )
     } )
 
 

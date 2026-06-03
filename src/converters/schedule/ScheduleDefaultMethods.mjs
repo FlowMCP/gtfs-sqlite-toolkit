@@ -104,6 +104,56 @@ const METHOD_CATALOG = [
             type: 'object',
             description: 'booking_rules row, schema depends on which optional fields are present'
         }
+    },
+    {
+        name: 'nearPoint',
+        requiresCapabilities: [ 'basicLookup' ],
+        spatialEngine: true,
+        sqlTemplate: 'SELECT stop_id, stop_name, stop_lat, stop_lon FROM stops WHERE stop_lat IS NOT NULL AND stop_lon IS NOT NULL',
+        params: {
+            lat:          { type: 'number',  required: true,  description: 'Center latitude (WGS84)' },
+            lon:          { type: 'number',  required: true,  description: 'Center longitude (WGS84)' },
+            radiusMeters: { type: 'number',  required: true,  description: 'Search radius in METERS' },
+            limit:        { type: 'integer', required: false, default: 50, description: 'Max results' }
+        },
+        outputSchema: {
+            type: 'array',
+            items: {
+                type: 'object',
+                properties: {
+                    stop_id:   { type: 'string' },
+                    stop_name: { type: 'string' },
+                    stop_lat:  { type: 'number' },
+                    stop_lon:  { type: 'number' },
+                    distanceM: { type: 'number' }
+                }
+            }
+        }
+    },
+    {
+        name: 'inBoundingBox',
+        requiresCapabilities: [ 'basicLookup' ],
+        spatialEngine: true,
+        sqlTemplate: 'SELECT stop_id, stop_name, stop_lat, stop_lon FROM stops WHERE stop_lat IS NOT NULL AND stop_lon IS NOT NULL',
+        params: {
+            minLon: { type: 'number',  required: true,  description: 'West bound (WGS84 longitude)' },
+            minLat: { type: 'number',  required: true,  description: 'South bound (WGS84 latitude)' },
+            maxLon: { type: 'number',  required: true,  description: 'East bound (WGS84 longitude)' },
+            maxLat: { type: 'number',  required: true,  description: 'North bound (WGS84 latitude)' },
+            limit:  { type: 'integer', required: false, default: 100, description: 'Max results' }
+        },
+        outputSchema: {
+            type: 'array',
+            items: {
+                type: 'object',
+                properties: {
+                    stop_id:   { type: 'string' },
+                    stop_name: { type: 'string' },
+                    stop_lat:  { type: 'number' },
+                    stop_lon:  { type: 'number' }
+                }
+            }
+        }
     }
 ]
 
@@ -127,5 +177,128 @@ export class ScheduleDefaultMethods {
             throw new Error( `Unknown method: ${name}` )
         }
         return { ...method }
+    }
+
+
+    static nearPoint( { db, lat, lon, radiusMeters, limit = 50 } ) {
+        const { status, messages } = ScheduleDefaultMethods.#validationNearPoint( { db, lat, lon, radiusMeters } )
+        if( !status ) { throw new Error( messages.join( '; ' ) ) }
+
+        const rows = db
+            .prepare( 'SELECT stop_id, stop_name, stop_lat, stop_lon FROM stops WHERE stop_lat IS NOT NULL AND stop_lon IS NOT NULL' )
+            .all()
+        const stops = rows
+            .map( ( row ) => {
+                const distanceM = ScheduleDefaultMethods.#haversineKm( {
+                    lat1: lat, lon1: lon, lat2: row.stop_lat, lon2: row.stop_lon
+                } ) * 1000
+                return { row, distanceM }
+            } )
+            .filter( ( entry ) => entry.distanceM <= radiusMeters )
+            .sort( ( a, b ) => a.distanceM - b.distanceM )
+            .slice( 0, limit )
+            .map( ( entry ) => {
+                return {
+                    stop_id:   entry.row.stop_id,
+                    stop_name: entry.row.stop_name,
+                    stop_lat:  entry.row.stop_lat,
+                    stop_lon:  entry.row.stop_lon,
+                    distanceM: Math.round( entry.distanceM * 10 ) / 10
+                }
+            } )
+        return { stops, matchCount: stops.length }
+    }
+
+
+    static inBoundingBox( { db, minLon, minLat, maxLon, maxLat, limit = 100 } ) {
+        const { status, messages } = ScheduleDefaultMethods.#validationInBoundingBox( { db, minLon, minLat, maxLon, maxLat } )
+        if( !status ) { throw new Error( messages.join( '; ' ) ) }
+
+        const rows = db
+            .prepare( 'SELECT stop_id, stop_name, stop_lat, stop_lon FROM stops WHERE stop_lat IS NOT NULL AND stop_lon IS NOT NULL' )
+            .all()
+        const stops = rows
+            .filter( ( row ) => {
+                return row.stop_lon >= minLon
+                    && row.stop_lon <= maxLon
+                    && row.stop_lat >= minLat
+                    && row.stop_lat <= maxLat
+            } )
+            .slice( 0, limit )
+            .map( ( row ) => {
+                return {
+                    stop_id:   row.stop_id,
+                    stop_name: row.stop_name,
+                    stop_lat:  row.stop_lat,
+                    stop_lon:  row.stop_lon
+                }
+            } )
+        return { stops, matchCount: stops.length }
+    }
+
+
+    static #validationNearPoint( { db, lat, lon, radiusMeters } ) {
+        const struct = { status: false, messages: [] }
+        if( db === undefined || db === null ) {
+            struct.messages.push( 'db is required' )
+            return struct
+        }
+        const fields = [
+            [ 'lat',          lat ],
+            [ 'lon',          lon ],
+            [ 'radiusMeters', radiusMeters ]
+        ]
+        fields
+            .forEach( ( [ key, value ] ) => {
+                if( value === undefined || value === null ) {
+                    struct.messages.push( `${key} is required` )
+                    return
+                }
+                if( typeof value !== 'number' || Number.isNaN( value ) ) {
+                    struct.messages.push( `${key} must be a number` )
+                }
+            } )
+        if( struct.messages.length === 0 ) { struct.status = true }
+        return struct
+    }
+
+
+    static #validationInBoundingBox( { db, minLon, minLat, maxLon, maxLat } ) {
+        const struct = { status: false, messages: [] }
+        if( db === undefined || db === null ) {
+            struct.messages.push( 'db is required' )
+            return struct
+        }
+        const fields = [
+            [ 'minLon', minLon ],
+            [ 'minLat', minLat ],
+            [ 'maxLon', maxLon ],
+            [ 'maxLat', maxLat ]
+        ]
+        fields
+            .forEach( ( [ key, value ] ) => {
+                if( value === undefined || value === null ) {
+                    struct.messages.push( `${key} is required` )
+                    return
+                }
+                if( typeof value !== 'number' || Number.isNaN( value ) ) {
+                    struct.messages.push( `${key} must be a number` )
+                }
+            } )
+        if( struct.messages.length === 0 ) { struct.status = true }
+        return struct
+    }
+
+
+    static #haversineKm( { lat1, lon1, lat2, lon2 } ) {
+        const toRad = ( deg ) => deg * Math.PI / 180
+        const R = 6371
+        const dLat = toRad( lat2 - lat1 )
+        const dLon = toRad( lon2 - lon1 )
+        const a = Math.sin( dLat / 2 ) * Math.sin( dLat / 2 ) +
+            Math.cos( toRad( lat1 ) ) * Math.cos( toRad( lat2 ) ) *
+            Math.sin( dLon / 2 ) * Math.sin( dLon / 2 )
+        const c = 2 * Math.atan2( Math.sqrt( a ), Math.sqrt( 1 - a ) )
+        return R * c
     }
 }

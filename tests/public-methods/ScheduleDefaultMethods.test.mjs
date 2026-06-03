@@ -3,16 +3,18 @@ import { ScheduleDefaultMethods } from '../../src/converters/schedule/ScheduleDe
 
 
 describe( 'ScheduleDefaultMethods', () => {
-    test( 'getAllMethods returns 5 methods', () => {
+    test( 'getAllMethods returns 7 methods', () => {
         const methods = ScheduleDefaultMethods.getAllMethods()
-        expect( methods.length ).toBe( 5 )
+        expect( methods.length ).toBe( 7 )
         const names = methods.map( ( m ) => m.name )
         expect( names ).toEqual( [
             'searchStops',
             'searchRoutes',
             'getDepartures',
             'getShapeForRoute',
-            'getFlexBookingRules'
+            'getFlexBookingRules',
+            'nearPoint',
+            'inBoundingBox'
         ] )
     } )
 
@@ -45,7 +47,7 @@ describe( 'ScheduleDefaultMethods', () => {
             shapesVisualization: true, flexService: true
         }
         const result = ScheduleDefaultMethods.getMethodsForCapabilities( { capabilities: allTrue } )
-        expect( result.length ).toBe( 5 )
+        expect( result.length ).toBe( 7 )
     } )
 
 
