@@ -1,6 +1,6 @@
 {
     "name": "geo-gtfs-toolkit",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "type": "module",
     "description": "Convert GTFS Schedule feeds (CSV in ZIP) to queryable SQLite with quality seal, capability detection, and reusable default queries",
     "main": "src/index.mjs",

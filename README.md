@@ -79,12 +79,32 @@ When FlowMCP-CLI accepts a `source: 'sqlite-gtfs'` resource it auto-injects the 
 - `getDepartures` — upcoming departures per stop (requires `departures`)
 - `getShapeForRoute` — shape points for visualization (requires `shapesVisualization` + `routing`)
 - `getFlexBookingRules` — booking rule lookup for flex/demand-responsive services (requires `flexService`)
-- `nearPoint` — Haversine radius search over `stops`; `{ lat, lon, radiusMeters, limit? }`, radius in METERS, returns stops sorted ascending by `distanceM` (requires `basicLookup`)
-- `inBoundingBox` — lon-first (RFC 7946) bounding-box filter over `stops`; `{ minLon, minLat, maxLon, maxLat, limit? }` (requires `basicLookup`)
+- `nearPoint` — Haversine radius search over `stops`; `{ lat, lon, radiusMeters, limit? }`, radius in METERS, returns a normalized RFC 7946 `FeatureCollection` sorted ascending by `_distanceMeters` (requires `basicLookup`)
+- `inBoundingBox` — lon-first (RFC 7946) bounding-box filter over `stops`; `{ minLon, minLat, maxLon, maxLat, limit? }`, returns a normalized RFC 7946 `FeatureCollection` (requires `basicLookup`)
 
 Tool names are prefixed with the schema namespace (e.g. `gtfsde.searchStops`). When a capability is missing from the converted DB, the corresponding tool is omitted.
 
-`nearPoint` and `inBoundingBox` are spatial-engine methods: they run the Haversine / bbox computation in JS over the `stops` rows (no FTS5, no PostGIS). Call them with an open `better-sqlite3` handle, e.g. `ScheduleDefaultMethods.nearPoint( { db, lat, lon, radiusMeters } )` → `{ stops, matchCount }`. Output rows include `stop_id`, `stop_name`, `stop_lat`, `stop_lon`, plus `distanceM` (rounded, in metres) for `nearPoint`.
+`nearPoint` and `inBoundingBox` are spatial-engine methods: they run the Haversine / bbox computation in JS over the `stops` rows (no FTS5, no PostGIS). Call them with an open `better-sqlite3` handle, e.g. `ScheduleDefaultMethods.nearPoint( { db, lat, lon, radiusMeters } )`. Both return the canonical normalized GeoJSON output (the same "gleicher Standard" shared by the geojson, csv and geo-overpass toolkits):
+
+```js
+{
+    type: 'FeatureCollection',
+    features: [
+        {
+            type: 'Feature',
+            geometry: { type: 'Point', coordinates: [ stop_lon, stop_lat ] }, // lon-first (RFC 7946)
+            properties: {
+                stop_id, stop_name,
+                _source: 'gtfs-de',
+                _distanceMeters: 123.4 // haversine metres (rounded 0.1) for nearPoint; null for inBoundingBox
+            }
+        }
+    ],
+    meta: { count: 1, source: 'gtfs-de' }
+}
+```
+
+`nearPoint` features are sorted ascending by `_distanceMeters` and sliced to `limit`; `inBoundingBox` features carry `_distanceMeters: null` and are sliced to `limit`. `meta.count` equals `features.length`. The non-spatial schedule methods (`searchStops`, `searchRoutes`, `getDepartures`, `getShapeForRoute`, `getFlexBookingRules`) return plain row arrays / objects as before — they are unchanged.
 
 ### Capability Matrix
 

@@ -117,15 +117,41 @@ const METHOD_CATALOG = [
             limit:        { type: 'integer', required: false, default: 50, description: 'Max results' }
         },
         outputSchema: {
-            type: 'array',
-            items: {
-                type: 'object',
-                properties: {
-                    stop_id:   { type: 'string' },
-                    stop_name: { type: 'string' },
-                    stop_lat:  { type: 'number' },
-                    stop_lon:  { type: 'number' },
-                    distanceM: { type: 'number' }
+            type: 'object',
+            description: 'RFC 7946 FeatureCollection (lon-first); properties carry _source and _distanceMeters',
+            properties: {
+                type:     { type: 'string' },
+                features: {
+                    type: 'array',
+                    items: {
+                        type: 'object',
+                        properties: {
+                            type:     { type: 'string' },
+                            geometry: {
+                                type: 'object',
+                                properties: {
+                                    type:        { type: 'string' },
+                                    coordinates: { type: 'array', items: { type: 'number' } }
+                                }
+                            },
+                            properties: {
+                                type: 'object',
+                                properties: {
+                                    stop_id:         { type: 'string' },
+                                    stop_name:       { type: 'string' },
+                                    _source:         { type: 'string' },
+                                    _distanceMeters: { type: 'number' }
+                                }
+                            }
+                        }
+                    }
+                },
+                meta: {
+                    type: 'object',
+                    properties: {
+                        count:  { type: 'integer' },
+                        source: { type: 'string' }
+                    }
                 }
             }
         }
@@ -143,19 +169,49 @@ const METHOD_CATALOG = [
             limit:  { type: 'integer', required: false, default: 100, description: 'Max results' }
         },
         outputSchema: {
-            type: 'array',
-            items: {
-                type: 'object',
-                properties: {
-                    stop_id:   { type: 'string' },
-                    stop_name: { type: 'string' },
-                    stop_lat:  { type: 'number' },
-                    stop_lon:  { type: 'number' }
+            type: 'object',
+            description: 'RFC 7946 FeatureCollection (lon-first); properties carry _source and _distanceMeters (null for bbox)',
+            properties: {
+                type:     { type: 'string' },
+                features: {
+                    type: 'array',
+                    items: {
+                        type: 'object',
+                        properties: {
+                            type:     { type: 'string' },
+                            geometry: {
+                                type: 'object',
+                                properties: {
+                                    type:        { type: 'string' },
+                                    coordinates: { type: 'array', items: { type: 'number' } }
+                                }
+                            },
+                            properties: {
+                                type: 'object',
+                                properties: {
+                                    stop_id:         { type: 'string' },
+                                    stop_name:       { type: 'string' },
+                                    _source:         { type: 'string' },
+                                    _distanceMeters: { type: [ 'number', 'null' ] }
+                                }
+                            }
+                        }
+                    }
+                },
+                meta: {
+                    type: 'object',
+                    properties: {
+                        count:  { type: 'integer' },
+                        source: { type: 'string' }
+                    }
                 }
             }
         }
     }
 ]
+
+
+const SOURCE = 'gtfs-de'
 
 
 export class ScheduleDefaultMethods {
@@ -187,7 +243,7 @@ export class ScheduleDefaultMethods {
         const rows = db
             .prepare( 'SELECT stop_id, stop_name, stop_lat, stop_lon FROM stops WHERE stop_lat IS NOT NULL AND stop_lon IS NOT NULL' )
             .all()
-        const stops = rows
+        const features = rows
             .map( ( row ) => {
                 const distanceM = ScheduleDefaultMethods.#haversineKm( {
                     lat1: lat, lon1: lon, lat2: row.stop_lat, lon2: row.stop_lon
@@ -198,15 +254,11 @@ export class ScheduleDefaultMethods {
             .sort( ( a, b ) => a.distanceM - b.distanceM )
             .slice( 0, limit )
             .map( ( entry ) => {
-                return {
-                    stop_id:   entry.row.stop_id,
-                    stop_name: entry.row.stop_name,
-                    stop_lat:  entry.row.stop_lat,
-                    stop_lon:  entry.row.stop_lon,
-                    distanceM: Math.round( entry.distanceM * 10 ) / 10
-                }
+                return ScheduleDefaultMethods.#toFeature( {
+                    row: entry.row, distanceMeters: Math.round( entry.distanceM * 10 ) / 10
+                } )
             } )
-        return { stops, matchCount: stops.length }
+        return ScheduleDefaultMethods.#toFeatureCollection( { features } )
     }
 
 
@@ -217,7 +269,7 @@ export class ScheduleDefaultMethods {
         const rows = db
             .prepare( 'SELECT stop_id, stop_name, stop_lat, stop_lon FROM stops WHERE stop_lat IS NOT NULL AND stop_lon IS NOT NULL' )
             .all()
-        const stops = rows
+        const features = rows
             .filter( ( row ) => {
                 return row.stop_lon >= minLon
                     && row.stop_lon <= maxLon
@@ -226,14 +278,9 @@ export class ScheduleDefaultMethods {
             } )
             .slice( 0, limit )
             .map( ( row ) => {
-                return {
-                    stop_id:   row.stop_id,
-                    stop_name: row.stop_name,
-                    stop_lat:  row.stop_lat,
-                    stop_lon:  row.stop_lon
-                }
+                return ScheduleDefaultMethods.#toFeature( { row, distanceMeters: null } )
             } )
-        return { stops, matchCount: stops.length }
+        return ScheduleDefaultMethods.#toFeatureCollection( { features } )
     }
 
 
@@ -287,6 +334,29 @@ export class ScheduleDefaultMethods {
             } )
         if( struct.messages.length === 0 ) { struct.status = true }
         return struct
+    }
+
+
+    static #toFeature( { row, distanceMeters } ) {
+        return {
+            type: 'Feature',
+            geometry: { type: 'Point', coordinates: [ row.stop_lon, row.stop_lat ] },
+            properties: {
+                stop_id:         row.stop_id,
+                stop_name:       row.stop_name,
+                _source:         SOURCE,
+                _distanceMeters: distanceMeters
+            }
+        }
+    }
+
+
+    static #toFeatureCollection( { features } ) {
+        return {
+            type: 'FeatureCollection',
+            features,
+            meta: { count: features.length, source: SOURCE }
+        }
     }
 
 
