@@ -92,7 +92,7 @@ describe( 'FlowMcpAdapter.verifySeal (integration — synthetic fixture)', () =>
 
 
 describe( 'FlowMcpAdapter.getAvailableMethods (integration — synthetic fixture)', () => {
-    test( 'returns the four methods enabled by synthetic capabilities', () => {
+    test( 'returns the six methods enabled by synthetic capabilities', () => {
         const { methods, capabilities } = FlowMcpAdapter.getAvailableMethods( { dbPath: FIXTURE_DB } )
 
         const names = methods.map( ( m ) => m.name )
@@ -101,7 +101,9 @@ describe( 'FlowMcpAdapter.getAvailableMethods (integration — synthetic fixture
         expect( names ).toContain( 'searchRoutes' )
         expect( names ).toContain( 'getDepartures' )
         expect( names ).toContain( 'getShapeForRoute' )
-        expect( names.length ).toBe( 4 )
+        expect( names ).toContain( 'nearPoint' )
+        expect( names ).toContain( 'inBoundingBox' )
+        expect( names.length ).toBe( 6 )
 
         expect( typeof capabilities ).toBe( 'object' )
         expect( capabilities.basicLookup ).toBe( true )

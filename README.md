@@ -67,8 +67,12 @@ When FlowMCP-CLI accepts a `source: 'sqlite-gtfs'` resource it auto-injects the 
 - `getDepartures` — upcoming departures per stop (requires `departures`)
 - `getShapeForRoute` — shape points for visualization (requires `shapesVisualization` + `routing`)
 - `getFlexBookingRules` — booking rule lookup for flex/demand-responsive services (requires `flexService`)
+- `nearPoint` — Haversine radius search over `stops`; `{ lat, lon, radiusMeters, limit? }`, radius in METERS, returns stops sorted ascending by `distanceM` (requires `basicLookup`)
+- `inBoundingBox` — lon-first (RFC 7946) bounding-box filter over `stops`; `{ minLon, minLat, maxLon, maxLat, limit? }` (requires `basicLookup`)
 
 Tool names are prefixed with the schema namespace (e.g. `gtfsde.searchStops`). When a capability is missing from the converted DB, the corresponding tool is omitted.
+
+`nearPoint` and `inBoundingBox` are spatial-engine methods: they run the Haversine / bbox computation in JS over the `stops` rows (no FTS5, no PostGIS). Call them with an open `better-sqlite3` handle, e.g. `ScheduleDefaultMethods.nearPoint( { db, lat, lon, radiusMeters } )` → `{ stops, matchCount }`. Output rows include `stop_id`, `stop_name`, `stop_lat`, `stop_lon`, plus `distanceM` (rounded, in metres) for `nearPoint`.
 
 ### Capability Matrix
 
@@ -190,7 +194,7 @@ Read the `meta` table back from a converted DB. All 10 mandatory keys (`qualityS
 
 ### `ScheduleDefaultMethods.getMethodsForCapabilities( { capabilities } )` → `Array<methodDef>`
 
-Filter the catalog of 5 standard methods (`searchStops`, `searchRoutes`, `getDepartures`, `getShapeForRoute`, `getFlexBookingRules`) by what the capabilities matrix supports. Each method has `sqlTemplate`, `params`, and `outputSchema`.
+Filter the catalog of 7 standard methods (`searchStops`, `searchRoutes`, `getDepartures`, `getShapeForRoute`, `getFlexBookingRules`, `nearPoint`, `inBoundingBox`) by what the capabilities matrix supports. Each method has `sqlTemplate`, `params`, and `outputSchema`. The two spatial methods (`nearPoint`, `inBoundingBox`) additionally carry a `spatialEngine: true` marker and are executed via `ScheduleDefaultMethods.nearPoint( { db, ... } )` / `ScheduleDefaultMethods.inBoundingBox( { db, ... } )` (Haversine / bbox computed in JS over the `stops` rows).
 
 ## Examples
 
