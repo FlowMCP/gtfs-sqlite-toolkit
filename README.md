@@ -1,5 +1,7 @@
 # geo-gtfs-toolkit
 
+**Version:** 0.2.0
+
 <!-- Badges (License, Node, Workflow, Coverage) — enabled after going public -->
 <!-- ![License](https://img.shields.io/github/license/FlowMCP/gtfs-sqlite-toolkit) -->
 <!-- ![Node](https://img.shields.io/badge/node-22-blue) -->
