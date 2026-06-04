@@ -1,6 +1,6 @@
 # GTFS-NNN Error Codes
 
-Reference for all 21 codes emitted by `gtfs-sqlite-toolkit`. Codes are grouped by severity, signalled by the numeric range.
+Reference for all 21 codes emitted by `geo-gtfs-toolkit`. Codes are grouped by severity, signalled by the numeric range.
 
 > Codes are calibrated against the [GTFS Schedule Reference](https://gtfs.org/documentation/schedule/reference/) (source-of-truth Markdown: [github.com/google/transit](https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md)) — revision `2026-04-27`, downloaded on 2026-05-21.
 

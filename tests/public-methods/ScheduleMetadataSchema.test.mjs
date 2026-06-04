@@ -33,7 +33,7 @@ describe( 'ScheduleMetadataSchema', () => {
             qualitySeal: 'sqlite-gtfs',
             specUrl: 'https://gtfs.org/x',
             specRevision: '2026-04-27',
-            converterVersion: 'gtfs-sqlite-toolkit@0.1.0',
+            converterVersion: 'geo-gtfs-toolkit@0.1.0',
             sourceUrl: null,
             sourceHash: null,
             buildDate: '2026-05-21T00:00:00Z',

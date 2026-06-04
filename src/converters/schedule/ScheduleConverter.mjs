@@ -16,7 +16,7 @@ import { join } from 'node:path'
 import { extract as tarExtract } from 'tar'
 
 
-const CONVERTER_VERSION = 'gtfs-sqlite-toolkit@0.1.0'
+const CONVERTER_VERSION = 'geo-gtfs-toolkit@0.1.0'
 
 
 export class ScheduleConverter {

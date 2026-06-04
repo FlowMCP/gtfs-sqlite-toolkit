@@ -3,15 +3,15 @@
 **Version:** 0.2.0
 
 <!-- Badges (License, Node, Workflow, Coverage) — enabled after going public -->
-<!-- ![License](https://img.shields.io/github/license/FlowMCP/gtfs-sqlite-toolkit) -->
+<!-- ![License](https://img.shields.io/github/license/FlowMCP/geo-gtfs-toolkit) -->
 <!-- ![Node](https://img.shields.io/badge/node-22-blue) -->
-<!-- ![Workflow](https://img.shields.io/github/actions/workflow/status/FlowMCP/gtfs-sqlite-toolkit/test-on-push.yml) -->
-<!-- ![Coverage](https://img.shields.io/codecov/c/github/FlowMCP/gtfs-sqlite-toolkit) -->
+<!-- ![Workflow](https://img.shields.io/github/actions/workflow/status/FlowMCP/geo-gtfs-toolkit/test-on-push.yml) -->
+<!-- ![Coverage](https://img.shields.io/codecov/c/github/FlowMCP/geo-gtfs-toolkit) -->
 
 Convert GTFS Schedule feeds (CSV in ZIP) to queryable SQLite databases with quality seal, capability detection, and reusable default queries.
 
 This add-on is part of the FlowMCP geo add-on family (`geo-geojson-toolkit` /
-`geo-csv-tsv-toolkit` / `gtfs-sqlite-toolkit` / `geo-overpass-toolkit`). It shares
+`geo-csv-tsv-toolkit` / `geo-gtfs-toolkit` / `geo-overpass-toolkit`). It shares
 the common geo spatial methods — `nearPoint`, `inBoundingBox` (over `stops`) —
 and adds GTFS-specific methods (`searchStops`, `searchRoutes`, `getDepartures`,
 `getShapeForRoute`, `getFlexBookingRules`).
@@ -47,7 +47,7 @@ export const schema = {
                 path:         '${FLOWMCP_RESOURCES}/gtfs-de.db',
                 addon:        'geo-gtfs-toolkit',
                 addonVersion: '>=0.1.0',
-                addonSource:  'github:FlowMCP/gtfs-sqlite-toolkit'
+                addonSource:  'github:FlowMCP/geo-gtfs-toolkit'
             }
         ],
         tools: [
@@ -64,13 +64,13 @@ export const schema = {
 
 ```bash
 # Latest from main
-npm install github:FlowMCP/gtfs-sqlite-toolkit
+npm install github:FlowMCP/geo-gtfs-toolkit
 
 # Pin to a release
-npm install github:FlowMCP/gtfs-sqlite-toolkit#v0.1.0
+npm install github:FlowMCP/geo-gtfs-toolkit#v0.1.0
 ```
 
-> **Not on the npm registry.** The package is distributed via GitHub only. Use the `github:FlowMCP/gtfs-sqlite-toolkit` shorthand in your `package.json` dependencies.
+> **Not on the npm registry.** The package is distributed via GitHub only. Use the `github:FlowMCP/geo-gtfs-toolkit` shorthand in your `package.json` dependencies.
 
 ### Auto-Tools
 
@@ -152,9 +152,9 @@ All three methods validate their inputs and throw a descriptive `Error` for miss
 This toolkit is published as a GitHub repo, **not** on the npm registry. Install via the GitHub shorthand:
 
 ```bash
-npm install github:FlowMCP/gtfs-sqlite-toolkit
+npm install github:FlowMCP/geo-gtfs-toolkit
 # or pin to a release:
-npm install github:FlowMCP/gtfs-sqlite-toolkit#v0.1.0
+npm install github:FlowMCP/geo-gtfs-toolkit#v0.1.0
 ```
 
 ```javascript
@@ -402,14 +402,14 @@ All 21 codes are documented in [`docs/error-codes.md`](docs/error-codes.md) with
 Local development:
 
 ```bash
-git clone https://github.com/FlowMCP/gtfs-sqlite-toolkit
-cd gtfs-sqlite-toolkit
+git clone https://github.com/FlowMCP/geo-gtfs-toolkit
+cd geo-gtfs-toolkit
 npm install         # installs dev + runtime deps; uses git source, not npm registry
 npm test
 npm run test:coverage:src
 ```
 
-**Note:** This package is **not** on the npm registry. Distribution is via GitHub only (`github:FlowMCP/gtfs-sqlite-toolkit`).
+**Note:** This package is **not** on the npm registry. Distribution is via GitHub only (`github:FlowMCP/geo-gtfs-toolkit`).
 
 Manual POC scripts (need real data, see `tests/manual/run-*.mjs`):
 

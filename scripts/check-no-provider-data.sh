@@ -2,7 +2,7 @@
 #
 # check-no-provider-data.sh
 # -------------------------
-# Pre-push guardrail for gtfs-sqlite-toolkit (Memo 051 Phase 6 / PRD-30).
+# Pre-push guardrail for geo-gtfs-toolkit (Memo 051 Phase 6 / PRD-30).
 #
 # Purpose:
 #   Prevents accidental commit of third-party GTFS provider data (VBB, BVG,

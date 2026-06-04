@@ -36,7 +36,7 @@ describe( 'FlowMcpAdapter.verifySeal', () => {
             qualitySeal:      'sqlite-gtfs',
             specUrl:          'https://gtfs.org/documentation/schedule/reference/',
             specRevision:     '2026-04-27',
-            converterVersion: 'gtfs-sqlite-toolkit@0.1.0',
+            converterVersion: 'geo-gtfs-toolkit@0.1.0',
             sourceUrl:        'https://example.com/feed.zip',
             sourceHash:       'sha256:abcdef',
             buildDate:        '2026-05-21T12:00:00Z',
@@ -53,7 +53,7 @@ describe( 'FlowMcpAdapter.verifySeal', () => {
         expect( result.meta.qualitySeal ).toBe( 'sqlite-gtfs' )
         expect( result.meta.specRevision ).toBe( '2026-04-27' )
         expect( result.meta.specUrl ).toBe( 'https://gtfs.org/documentation/schedule/reference/' )
-        expect( result.meta.converterVersion ).toBe( 'gtfs-sqlite-toolkit@0.1.0' )
+        expect( result.meta.converterVersion ).toBe( 'geo-gtfs-toolkit@0.1.0' )
         expect( result.meta.capabilities.basicLookup ).toBe( true )
         expect( result.meta.rowCounts.stops ).toBe( 5 )
         expect( result.reason ).toBeUndefined()

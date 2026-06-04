@@ -8,12 +8,12 @@
     "author": "FlowMCP",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/FlowMCP/gtfs-sqlite-toolkit.git"
+        "url": "git+https://github.com/FlowMCP/geo-gtfs-toolkit.git"
     },
     "bugs": {
-        "url": "https://github.com/FlowMCP/gtfs-sqlite-toolkit/issues"
+        "url": "https://github.com/FlowMCP/geo-gtfs-toolkit/issues"
     },
-    "homepage": "https://github.com/FlowMCP/gtfs-sqlite-toolkit#readme",
+    "homepage": "https://github.com/FlowMCP/geo-gtfs-toolkit#readme",
     "engines": {
         "node": ">=22.0.0"
     },

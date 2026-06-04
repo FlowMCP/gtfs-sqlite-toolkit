@@ -1,6 +1,6 @@
 # Synthetic Mini-GTFS Fixture (CC0)
 
-A fully fictional GTFS Schedule dataset used for reproducible tests of the `gtfs-sqlite-toolkit` and its FlowMCP integration. No real transit-provider data is included.
+A fully fictional GTFS Schedule dataset used for reproducible tests of the `geo-gtfs-toolkit` and its FlowMCP integration. No real transit-provider data is included.
 
 ## Purpose
 
